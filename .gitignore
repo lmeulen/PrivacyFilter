@@ -1,2 +1,7 @@
 /*.ipynb
 /datasets/RAW*
+/flashtext
+/osmnx
+/.ipynb_checkpoints
+/cache
+/input_data
