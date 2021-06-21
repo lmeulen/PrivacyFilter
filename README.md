@@ -6,7 +6,14 @@ files are all in Dutch but can be replaced by datasets for other languages.
 
 ## Dependencies
 - FlashText
+
+And for downloading and creating new datafiles
 - Osmnx
+- Pandas
+- GeoPandas
+- Numpy
+- BeautifoulSoup
+- cbsodata
 
 ## Example usage
 ~~~~
