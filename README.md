@@ -36,5 +36,11 @@ The script DataUpdater.py updates the datasets. The following sources are used:
 - Diseases: https://nl.wikibooks.org/wiki/Geneeskunde/Lijst_van_aandoeningen
 - Medicines: https://www.ema.europa.eu/sites/default/files/Medicines_output_referrals.xlsx
 
-A new resource for medicines is 
+A new resource for medicines is highly recommended!
+
+## Performance
+
+The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my platfor.
+Parsing a sentence and replacing privacy related information is fast, It takes less than 0.5 ms.
+
 Enjoy!
