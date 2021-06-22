@@ -32,7 +32,7 @@ Het is <DATUM>.
 The script DataUpdater.py updates the datasets. The following sources are used:
 - Names: https://www.naamkunde.net
 - Places: https://www.cbs.nl, dataset 84992
-- Streets: Open Streepmap 
+- Streets: Open StreetMap (python package osmnx) 
 - Diseases: https://nl.wikibooks.org/wiki/Geneeskunde/Lijst_van_aandoeningen
 - Medicines: https://www.ema.europa.eu/sites/default/files/Medicines_output_referrals.xlsx
 
