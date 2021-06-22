@@ -88,12 +88,23 @@ class PrivacyFilter:
 
 
 def insert_newlines(string, every=64):
+    """
+    Insert a new line every n characters.
+    Parameters
+    ----------
+    string Text to adapt
+    every After each <every> character, insert a newline
+
+    Returns
+    -------
+    Adapted string
+    """
     return '\n'.join(string[i:i + every] for i in range(0, len(string), every))
 
 
 def main():
     zin = "De mogelijkheden zijn sinds 2014 groot geworden, zeker vergeleken met 2012, hè Kees? Het systeem maakt " \
-          "verschillende bewerkningen mogelijk die hiervoor niet mogelijk waren. De datum is 24–01–2011 (of 24 jan 21 "\
+          "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24–01–2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
           "ranitidine voor. "
@@ -104,7 +115,7 @@ def main():
     pfilter = PrivacyFilter()
     pfilter.initialize()
 
-    print('\nConstructor time %4.0f msec' % ((time.time() - start) * 1000))
+    print('\nInitialisation time %4.0f msec' % ((time.time() - start) * 1000))
 
     start = time.time()
     nr_sentences = 1000
