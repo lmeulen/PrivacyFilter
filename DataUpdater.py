@@ -11,7 +11,7 @@ import numpy as np
 import xml.etree.ElementTree as ElementTree
 from bs4 import BeautifulSoup
 
-# TODO: Utrecht en Groningen downloaden alleen de stad, dit moet de provincie worden
+# TODO: Utrecht and Groningen downloads are city only, need bounded box
 for name in ['Gelderland', 'Overijssel', 'Drenthe', 'Groningen', 'Friesland', 'Zeeland', 'Utrecht',
              'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
     print(name)
@@ -79,7 +79,7 @@ for tag in div.find_all("li"):
 self.aandoeningen = pd.DataFrame(aandoeningen, columns=['aandoening'])
 self.aandoeningen.to_csv("datasets\\aandoeningen.csv", index=False)
 
-# TODO Automatisch parsen van de XLSX zonder handmatige conversie naar CVS
+# TODO Manual parsing still required from XLSX to CSV, but better source required
 url = "https://www.ema.europa.eu/sites/default/files/Medicines_output_referrals.xlsx"
 urllib.request.urlretrieve(url, "datasets\\RAW_medicijnen\\medicines.xlsx")
 # !!! Convert to csv in Excel
