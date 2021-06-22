@@ -34,10 +34,10 @@ class PrivacyFilter:
         for naam in self.file_to_list('datasets\\lastnames.csv'):
             self.keyword_processor_case_sensitive.add_keyword(naam, '<NAAM>')
 
-        for naam in self.file_to_list('datasets\\aandoeningen.csv'):
+        for naam in self.file_to_list('datasets/diseases.csv'):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<AANDOENING>')
 
-        for naam in self.file_to_list('datasets\\medicijnen.csv'):
+        for naam in self.file_to_list('datasets/medicines.csv'):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<MEDICIJN>')
 
         self.initialised = True
