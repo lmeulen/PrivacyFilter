@@ -8,6 +8,7 @@ class PrivacyFilter:
     def __init__(self):
         self.keyword_processor_case_sensitive = KeywordProcessor(case_sensitive=True)
         self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
+        self.url_re = None
         self.initialised = False
 
     def file_to_list(self, filename, minimum_length=0, drop_first=1):
@@ -40,6 +41,31 @@ class PrivacyFilter:
         for naam in self.file_to_list('datasets/medicines.csv'):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<MEDICIJN>')
 
+        # Make the URL regular expression
+        # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
+        ul = '\u00a1-\uffff'  # unicode letters range (must not be a raw string)
+        # IP patterns
+        ipv4_re = r'(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}'
+        ipv6_re = r'\[[0-9a-f:\.]+\]'
+        # Host patterns
+        hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
+        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'  # domain names have max length of 63 characters
+        tld_re = (
+                r'\.'  # dot 
+                r'(?!-)'  # can't start with a dash 
+                r'(?:[a-z' + ul + '-]{2,63}'  # domain label 
+                                  r'|xn--[a-z0-9]{1,59})'  # or punycode label 
+                                  r'(?<!-)'  # can't end with a dash 
+                                  r'\.?'  # may have a trailing dot
+        )
+        host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
+        self.url_re = re.compile(
+            r'(?:http|ftp)s?://'  # http(s):// or ftp(s)://
+            r'(?:\S+(?::\S*)?@)?'  # user:pass authentication 
+            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'  # localhost or ip
+                                                               r'(?::\d{2,5})?'  # optional port
+                                                               r'(?:[/?#][^\s]*)?'  # resource path
+            , re.IGNORECASE)
         self.initialised = True
 
     def remove_numbers(self, text, set_zero=True):
@@ -49,23 +75,24 @@ class PrivacyFilter:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
 
     def remove_dates(self, text):
-        text = re.sub("\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM> ", text)
+        text = re.sub("\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)([- /.]{,2}(\d{4}|\d{2})){,1})(?P<n>\D)(?![^<]*>)",
-            "<DATUM> ",
-            text)
+            "<DATUM> ", text)
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2})){,1})(?P<n>\D)(?![^<]*>)",
-            "<DATUM> ",
-            text)
+            "<DATUM> ", text)
         return text
 
     def remove_email(self, text):
         return re.sub("(([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))(?![^<]*>)",
                       "<EMAIL>",
                       text)
+
+    def remove_url(self, text):
+        return re.sub(self.url_re, "<URL>", text)
 
     def remove_postal_codes(self, text):
         return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
@@ -75,7 +102,7 @@ class PrivacyFilter:
             return inputtext
 
         text = " " + inputtext + " "
-
+        text = self.remove_url(text)
         text = self.remove_dates(text)
         text = self.remove_email(text)
         text = self.remove_postal_codes(text)
@@ -107,16 +134,13 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "ranitidine voor. "
+          "ranitidine (https://host.com/dfgr/dfdew ) voor. "
 
     print(insert_newlines(zin, 120))
     start = time.time()
-
     pfilter = PrivacyFilter()
     pfilter.initialize()
-
     print('\nInitialisation time %4.0f msec' % ((time.time() - start) * 1000))
-
     start = time.time()
     nr_sentences = 1000
     for i in range(0, nr_sentences):
