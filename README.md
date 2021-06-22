@@ -40,7 +40,7 @@ A new resource for medicines is highly recommended!
 
 ## Performance
 
-The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my platfor.
+The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my platform.
 Parsing a sentence and replacing privacy related information is fast, It takes less than 0.5 ms.
 
 Enjoy!
