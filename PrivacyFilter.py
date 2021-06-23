@@ -10,11 +10,13 @@ class PrivacyFilter:
         self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
         self.url_re = None
         self.initialised = False
+        self.nrterms = 0
 
     def file_to_list(self, filename, minimum_length=0, drop_first=1):
         with open(filename, encoding='latin') as f:
             lst = [line.rstrip() for line in f]
         lst = list(dict.fromkeys(lst))
+        self.nrterms += len(lst)
         if minimum_length > 0:
             lst = list(filter(lambda item: len(item) > minimum_length, lst))
         return lst[drop_first:]
@@ -110,7 +112,6 @@ class PrivacyFilter:
 
         text = self.keyword_processor_case_insensitive.replace_keywords(text)
         text = self.keyword_processor_case_sensitive.replace_keywords(text)
-
         return text.strip()
 
 
@@ -145,7 +146,9 @@ def main():
     nr_sentences = 1000
     for i in range(0, nr_sentences):
         zin = pfilter.filter(zin, set_numbers_zero=False)
-    print('Deduce time per sentence %4.2f msec\n' % ((time.time() - start) * 1000 / nr_sentences))
+    print('Deduce time per sentence %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
+    print('Number of forbidden words : ' + str(pfilter.nrterms))
+    print()
     print(insert_newlines(zin, 120))
 
 
