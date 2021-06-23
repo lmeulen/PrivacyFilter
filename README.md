@@ -1,8 +1,27 @@
 # PrivacyFilter
 Privacy Filter for free text
 
-This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines and diseases from text. The dataset 
-files are all in Dutch but can be replaced by datasets for other languages.
+This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
+and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
+
+There are two type of replacements; first regular explression based, then the forbidden word lists are removed using the
+FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
+
+Regular expresison based replacements:
+- URL
+- Email addresses
+- Dates
+- Postal codes (dutch format)
+- Numbers
+
+Keywords:
+- Streetnames
+- Places (cities, regions, etc)
+- First names
+- Last names
+- Medicines
+- Diseases
+
 
 ## Dependencies
 - FlashText
