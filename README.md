@@ -25,6 +25,8 @@ Keywords:
 
 ## Dependencies
 - FlashText
+- FastAPI (for the API only)
+- Uvicorn (for the API only)
 
 And for downloading and creating new datafiles
 - Osmnx
@@ -61,5 +63,17 @@ A new resource for medicines is highly recommended!
 
 The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my platform.
 Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms.
+
+## API
+
+The class PrivacyFilterAPI implements a HTTPS REST service around the PrivacyFilter class. Before 
+using the API, a key-pair must be generated using GenerateCertificate.py.
+
+~~~~
+python3 PrivacyFilterAPI
+~~~~
+
+After starting the API, a service is created at https://localhost:8000. The documentation for this 
+service is available at https://localhost:8000/docs.
 
 Enjoy!

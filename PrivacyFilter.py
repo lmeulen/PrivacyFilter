@@ -101,9 +101,9 @@ class PrivacyFilter:
 
     def filter(self, inputtext, set_numbers_zero=True):
         if not self.initialised:
-            return inputtext
+            return "FAILED"
 
-        text = " " + inputtext + " "
+        text = " " + inputtext + "."
         text = self.remove_url(text)
         text = self.remove_dates(text)
         text = self.remove_email(text)
@@ -112,7 +112,7 @@ class PrivacyFilter:
 
         text = self.keyword_processor_case_insensitive.replace_keywords(text)
         text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text.strip()
+        return text[:-1].strip()
 
 
 def insert_newlines(string, every=64):
