@@ -41,12 +41,16 @@ And for downloading and creating new datafiles
 pfilter = PrivacyFilter()
 pfilter.initialize()
 
-pfilter.filter("Het is 12-12-2021.", set_numbers_zero=False)
+pfilter.filter("Het is 12-12-2021.", set_numbers_zero=False, remove_accents=True)
 
 OUTPUT:
 
 Het is <DATUM>. 
 ~~~~
+
+The option set_number_zero determines wether numbers are replaced by the tag <NUMBER> or are 
+replaced by zeros. Setting the option remove_accents assures all accents are removed before 
+executing the filtering.  
 
 ## Updating datasets
 
