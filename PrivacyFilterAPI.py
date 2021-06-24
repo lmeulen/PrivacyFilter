@@ -15,7 +15,7 @@ class Item(BaseModel):
 
 @privacyFilterApp.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Welcome, please navigate to /filter"}
 
 
 @privacyFilterApp.post("/filter")
