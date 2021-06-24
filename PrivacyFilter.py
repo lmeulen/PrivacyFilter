@@ -1,7 +1,7 @@
 import time
 import re
+import os
 import unicodedata
-
 from flashtext import KeywordProcessor
 
 
@@ -25,25 +25,28 @@ class PrivacyFilter:
 
     def initialize(self):
 
-        for naam in self.file_to_list('datasets\\streets_Nederland.csv', minimum_length=5):
+        for naam in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
                 self.keyword_processor_case_insensitive.add_keyword(naam + c, '<ADRES>' + c)
 
-        for naam in self.file_to_list('datasets\\places.csv'):
+        for naam in self.file_to_list(os.path.join('datasets', 'places.csv')):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
                 self.keyword_processor_case_insensitive.add_keyword(naam + c, '<PLAATS>' + c)
 
-        for naam in self.file_to_list('datasets\\firstnames.csv'):
+        for naam in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
             self.keyword_processor_case_sensitive.add_keyword(naam, '<NAAM>')
 
-        for naam in self.file_to_list('datasets\\lastnames.csv'):
+        for naam in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
             self.keyword_processor_case_sensitive.add_keyword(naam, '<NAAM>')
 
-        for naam in self.file_to_list('datasets/diseases.csv'):
+        for naam in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<AANDOENING>')
 
-        for naam in self.file_to_list('datasets/medicines.csv'):
+        for naam in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<MEDICIJN>')
+
+        for naam in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(naam, '<NATIONALITEIT>')
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python

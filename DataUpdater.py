@@ -107,3 +107,10 @@ if __name__ == "__main__":
                 lijst.append(re.sub(r"\([^()]*\)", "", n).strip())
     medicines = pd.DataFrame(lijst, columns=['medicijn']).drop_duplicates()
     medicines.to_csv("datasets\\medicines.csv", index=False)
+
+    #
+    # Download nationalitites
+    #
+    total = pd.DataFrame(cbsodata.get_data('03743'))
+    nationalities = pd.DataFrame(total.Nationaliteiten.unique()[1:-1], columns=['nationaliteit']).drop_duplicates()
+    nationalities.to_csv("datasets\\nationalities.csv", index=False)
