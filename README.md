@@ -24,9 +24,12 @@ Keywords:
 
 
 ## Dependencies
+For using the PrivacyFilter class:
 - FlashText
-- FastAPI (for the API only)
-- Uvicorn (for the API only)
+
+Forusing the API:
+- FastAPI
+- Uvicorn
 
 And for downloading and creating new datafiles
 - Osmnx
