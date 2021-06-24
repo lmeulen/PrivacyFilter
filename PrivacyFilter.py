@@ -1,5 +1,7 @@
 import time
 import re
+import unicodedata
+
 from flashtext import KeywordProcessor
 
 
@@ -99,11 +101,17 @@ class PrivacyFilter:
     def remove_postal_codes(self, text):
         return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
 
-    def filter(self, inputtext, set_numbers_zero=True):
+    def remove_accents(self, text):
+        text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
+        return str(text.decode("utf-8"))
+
+    def filter(self, inputtext, set_numbers_zero=True, remove_accents=True):
         if not self.initialised:
             return "FAILED"
 
         text = " " + inputtext + "."
+        if remove_accents:
+            text = self.remove_accents(text)
         text = self.remove_url(text)
         text = self.remove_dates(text)
         text = self.remove_email(text)
@@ -135,7 +143,7 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "ranitidine (https://host.com/dfgr/dfdew ) voor. "
+          "ranitidine (https://host.com/dfgr/dfdew ) voor. Simòne."
 
     print(insert_newlines(zin, 120))
     start = time.time()
@@ -145,7 +153,7 @@ def main():
     start = time.time()
     nr_sentences = 1000
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False)
+        zin = pfilter.filter(zin, set_numbers_zero=False, remove_accents=True)
     print('Deduce time per sentence %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print('Number of forbidden words : ' + str(pfilter.nrterms))
     print()
