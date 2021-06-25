@@ -95,18 +95,32 @@ if __name__ == "__main__":
     #
     # Download medicines
     #
-    # TODO Manual parsing still required from XLSX to CSV, but better source required
-    url = "https://www.ema.europa.eu/sites/default/files/Medicines_output_referrals.xlsx"
-    urllib.request.urlretrieve(url, "datasets\\RAW_medicijnen\\medicines.xlsx")
-    # !!! Convert to csv in Excel
-    medicines = pd.read_csv("datasets\\RAW_medicijnen\\medicines.csv", sep=';')
-    lijst = []
-    for m in medicines.iloc[:, 2]:
-        if len(str(m)) > 3:
-            for n in m.split(','):
-                lijst.append(re.sub(r"\([^()]*\)", "", n).strip())
-    medicines = pd.DataFrame(lijst, columns=['medicijn']).drop_duplicates()
-    medicines.to_csv("datasets\\medicines.csv", index=False)
+    lst = []
+    for ltr in ['u', 'e', 'o', 'a']:
+        url = 'https://www.apotheek.nl/zoeken?q=' + ltr + '&filter=medicijnen'
+        print(url)
+        reqs = requests.get(url)
+        soup = BeautifulSoup(reqs.text, 'lxml')
+        div = soup.find_all("p", {"class": "searchIndication_text__2l4pd"})
+
+        results = int(div[0].find('span').text)
+        print(results)
+        count = 0
+        while count < results:
+            for med in soup.find_all("div", {"class": "searchItem_resultTitle__2TXzJ"}):
+                lst.append(med.text)
+            url = 'https://www.apotheek.nl/zoeken?q=u&filter=medicijnen&start=' + str(count + 10)
+            reqs = requests.get(url)
+            soup = BeautifulSoup(reqs.text, 'lxml')
+            count += 10
+    df = pd.DataFrame(lst, columns=['original'])
+    df['lengte'] = df['original'].str.len()
+    df = df.sort_values('lengte')
+    new = df["original"].str.replace('De Tuinen ', '').str.replace('/', ' ').str.replace(',', ' ') \
+        .str.replace('(', ' ').str.split(" ", n=1, expand=True)
+    df['medicijn'] = new[0].str.title()
+    df = df[['medicijn']].sort_values('medicijn').drop_duplicates()
+    df.to_csv("datasets\\medicines.csv", index=False)
 
     #
     # Download nationalitites
