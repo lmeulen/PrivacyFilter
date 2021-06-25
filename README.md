@@ -25,6 +25,7 @@ Keywords:
 - Medicines
 - Diseases
 - Nationalities
+- Countries
 
 
 ## Dependencies
@@ -68,7 +69,7 @@ The script DataUpdater.py updates the datasets. The following sources are used:
 - Diseases: https://nl.wikibooks.org/wiki/Geneeskunde/Lijst_van_aandoeningen
 - Medicines: https://www.apotheek.nl/zoeken?
 - Nationalities: https://www.cbs.nl, dataset 03743
-
+- Countries: https://nl.wikipedia.org/wiki/Lijst_van_landen_in_2020
 
 ## Performance
 

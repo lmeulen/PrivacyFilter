@@ -48,6 +48,9 @@ class PrivacyFilter:
         for naam in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
             self.keyword_processor_case_insensitive.add_keyword(naam, '<NATIONALITEIT>')
 
+        for naam in self.file_to_list(os.path.join('datasets', 'countries.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(naam, '<LAND>')
+
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
         ul = '\u00a1-\uffff'  # unicode letters range (must not be a raw string)

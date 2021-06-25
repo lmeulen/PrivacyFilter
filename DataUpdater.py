@@ -128,3 +128,27 @@ if __name__ == "__main__":
     total = pd.DataFrame(cbsodata.get_data('03743'))
     nationalities = pd.DataFrame(total.Nationaliteiten.unique()[1:-1], columns=['nationaliteit']).drop_duplicates()
     nationalities.to_csv("datasets\\nationalities.csv", index=False)
+
+    #
+    # Download countries
+    #
+    url = 'https://nl.wikipedia.org/wiki/Lijst_van_landen_in_2020'
+    print(url)
+    reqs = requests.get(url)
+    soup = BeautifulSoup(reqs.text, 'lxml')
+    tbls = soup.find_all("table", {"class": "wikitable"})
+    lst = []
+    for tbl in tbls:
+        rows = tbl.find_all("tr")
+        for row in rows:
+            cells = row.find_all("td")
+            if len(cells) == 4:
+                naam = cells[0].text.strip()
+                naam = re.sub("\[.*\]", "", naam)
+                lst.append(naam)
+                naam = re.sub("\(.*", "", naam)
+                naam = cells[1].text.strip()
+                lst.append(naam)
+                lst.append(cells[3].text.strip().split(":")[1].split('/')[0].strip())
+    countries = pd.DataFrame(lst, columns=['land']).drop_duplicates()
+    countries.to_csv("datasets\\countries.csv", index=False)
