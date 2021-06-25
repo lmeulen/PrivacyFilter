@@ -4,6 +4,9 @@ Privacy Filter for free text
 This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
 and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
 
+A PrivacyFilter class is available withh limited external dependencies (only FlashText). There is also a secure webservice
+implemented (FreeTextAPI).
+
 There are two type of replacements; first regular explression based, then the forbidden word lists are removed using the
 FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
 
@@ -28,7 +31,7 @@ Keywords:
 For using the PrivacyFilter class:
 - FlashText
 
-Forusing the API:
+For using the API:
 - FastAPI
 - Uvicorn
 
@@ -64,12 +67,12 @@ The script DataUpdater.py updates the datasets. The following sources are used:
 - Streets: Open StreetMap (python package osmnx) 
 - Diseases: https://nl.wikibooks.org/wiki/Geneeskunde/Lijst_van_aandoeningen
 - Medicines: https://www.apotheek.nl/zoeken?
-- Nationalitites: https://www.cbs.nl, dataset 03743
+- Nationalities: https://www.cbs.nl, dataset 03743
 
 
 ## Performance
 
-The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my platform.
+The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my computer (Intel i5-1035G7, 8GB, SSD).
 Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms.
 
 ## API
