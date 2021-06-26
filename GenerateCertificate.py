@@ -6,8 +6,8 @@ def generate_certificate(
         common_name="https://www.url.com",
         country="NL",
         duration=(365 * 24 * 60 * 60),
-        keyfile="key.pem",
-        certfile="cert.pem"):
+        keyfilename="key.pem",
+        certfilename="cert.pem"):
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 4096)
 
@@ -21,10 +21,10 @@ def generate_certificate(
     cert.set_pubkey(k)
     cert.sign(k, 'sha512')
 
-    with open(certfile, "wt") as file:
-        file.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("utf-8"))
-    with open(keyfile, "wt") as file:
-        file.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode("utf-8"))
+    with open(keyfilename, "wt") as keyfile:
+        keyfile.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode("utf-8"))
+    with open(certfilename, "wt") as certfile:
+        certfile.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("utf-8"))
 
 
 if __name__ == '__main__':

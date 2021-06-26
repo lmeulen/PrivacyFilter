@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 # TODO: REduce the number of dependencies (like pandas, geopandas, ...)
 
 if __name__ == "__main__":
+
     #
     # Download streetnames per province, and combine to the total set of streetnames
     #

@@ -12,44 +12,48 @@ class PrivacyFilter:
         self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
         self.url_re = None
         self.initialised = False
-        self.nrterms = 0
+        self.nr_keywords = 0
 
     def file_to_list(self, filename, minimum_length=0, drop_first=1):
         with open(filename, encoding='latin') as f:
             lst = [line.rstrip() for line in f]
         lst = list(dict.fromkeys(lst))
-        self.nrterms += len(lst)
+        self.nr_keywords += len(lst)
         if minimum_length > 0:
             lst = list(filter(lambda item: len(item) > minimum_length, lst))
         return lst[drop_first:]
 
     def initialize(self):
 
-        for naam in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
+        # Add words with an append character to prevent replacing partial words by tags.
+        # E.g. there is a street named AA and a verb AABB, with this additional character
+        # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
+        # implementation of a token based algorithm.
+        for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(naam + c, '<ADRES>' + c)
+                self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
 
-        for naam in self.file_to_list(os.path.join('datasets', 'places.csv')):
+        for name in self.file_to_list(os.path.join('datasets', 'places.csv')):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(naam + c, '<PLAATS>' + c)
+                self.keyword_processor_case_insensitive.add_keyword(name + c, '<PLAATS>' + c)
 
-        for naam in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            self.keyword_processor_case_sensitive.add_keyword(naam, '<NAAM>')
+        for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
+            self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
 
-        for naam in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            self.keyword_processor_case_sensitive.add_keyword(naam, '<NAAM>')
+        for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
+            self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
 
-        for naam in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(naam, '<AANDOENING>')
+        for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
 
-        for naam in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(naam, '<MEDICIJN>')
+        for name in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(name, '<MEDICIJN>')
 
-        for naam in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(naam, '<NATIONALITEIT>')
+        for name in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(name, '<NATIONALITEIT>')
 
-        for naam in self.file_to_list(os.path.join('datasets', 'countries.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(naam, '<LAND>')
+        for name in self.file_to_list(os.path.join('datasets', 'countries.csv')):
+            self.keyword_processor_case_insensitive.add_keyword(name, '<LAND>')
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -76,6 +80,7 @@ class PrivacyFilter:
                                                                r'(?::\d{2,5})?'  # optional port
                                                                r'(?:[/?#][^\s]*)?'  # resource path
             , re.IGNORECASE)
+
         self.initialised = True
 
     def remove_numbers(self, text, set_zero=True):
@@ -113,8 +118,11 @@ class PrivacyFilter:
 
     def filter(self, inputtext, set_numbers_zero=True, remove_accents=True):
         if not self.initialised:
-            return "FAILED"
+            self.initialize()
 
+        # Add space at the beginning of the text and a dot t the end to assure all
+        # words are found, also if e.g. the sentence ends with a word and not a dot
+        # Both are removed at the end of this fucntion
         text = " " + inputtext + "."
         if remove_accents:
             text = self.remove_accents(text)
@@ -152,16 +160,19 @@ def main():
           "heparine (https://host.com/dfgr/dfdew ) voor. Simòne."
 
     print(insert_newlines(zin, 120))
+
     start = time.time()
     pfilter = PrivacyFilter()
     pfilter.initialize()
-    print('\nInitialisation time %4.0f msec' % ((time.time() - start) * 1000))
+    print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
+    print('Number of forbidden words : ' + str(pfilter.nr_keywords))
+
     start = time.time()
     nr_sentences = 1000
     for i in range(0, nr_sentences):
         zin = pfilter.filter(zin, set_numbers_zero=False, remove_accents=True)
-    print('Deduce time per sentence %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
-    print('Number of forbidden words : ' + str(pfilter.nrterms))
+
+    print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
     print(insert_newlines(zin, 120))
 

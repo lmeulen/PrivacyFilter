@@ -8,3 +8,4 @@ bs4==4.9
 requests=2.0
 fastapi==0.60
 uvicorn==0.14
+pydantic

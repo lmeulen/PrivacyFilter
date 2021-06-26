@@ -4,21 +4,21 @@ Privacy Filter for free text
 This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
 and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
 
-A PrivacyFilter class is available withh limited external dependencies (only FlashText). There is also a secure webservice
+A PrivacyFilter class is available with limited external dependencies (only FlashText). There is also a secure webservice
 implemented (FreeTextAPI).
 
-There are two type of replacements; first regular explression based, then the forbidden word lists are removed using the
+There are two type of replacements; first regular expression based, then the forbidden word lists are removed using the
 FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
 
-Regular expresison based replacements:
+Regular expression based replacements:
 - URL
 - Email addresses
 - Dates
-- Postal codes (dutch format)
+- Postal codes (Dutch format)
 - Numbers
 
-Keywords:
-- Streetnames
+Keywords to be replaced ('forbidden words'):
+- Street names
 - Places (cities, regions, etc)
 - First names
 - Last names
@@ -56,7 +56,7 @@ OUTPUT:
 Het is <DATUM>. 
 ~~~~
 
-The option set_number_zero determines wether numbers are replaced by the tag <NUMBER> or are 
+The option set_number_zero determines whether numbers are replaced by the tag <NUMBER> or are 
 replaced by zeros. Setting the option remove_accents assures all accents are removed before 
 executing the filtering.  
 
@@ -65,7 +65,7 @@ executing the filtering.
 The script DataUpdater.py updates the datasets. The following sources are used:
 - Names: https://www.naamkunde.net
 - Places: https://www.cbs.nl, dataset 84992
-- Streets: Open StreetMap (python package osmnx) 
+- Streets: Open Street Map (python package osmnx) 
 - Diseases: https://nl.wikibooks.org/wiki/Geneeskunde/Lijst_van_aandoeningen
 - Medicines: https://www.apotheek.nl/zoeken?
 - Nationalities: https://www.cbs.nl, dataset 03743
