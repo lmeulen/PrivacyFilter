@@ -27,10 +27,12 @@ Keywords to be replaced ('forbidden words'):
 - Nationalities
 - Countries
 
+Named Entity REcognition with Spacy (optional)
 
 ## Dependencies
 For using the PrivacyFilter class:
 - FlashText
+- Spacy, inclusief nl_core_news_lg
 
 For using the API:
 - FastAPI
@@ -47,7 +49,7 @@ And for downloading and creating new datafiles
 ## Example usage
 ~~~~
 pfilter = PrivacyFilter()
-pfilter.initialize()
+pfilter.initialize(clean_accents=True, nlp_filter=True)
 
 pfilter.filter("Het is 12-12-2021.", set_numbers_zero=False, remove_accents=True)
 
@@ -59,6 +61,9 @@ Het is <DATUM>.
 The option set_number_zero determines whether numbers are replaced by the tag <NUMBER> or are 
 replaced by zeros. Setting the option remove_accents assures all accents are removed before 
 executing the filtering.  
+The option clean_accents determines if all accents are removed from the text to filter before
+filtering. The option nlp_filter determines whether or not to run the Spacy model. Using this
+model increases accuracy but reduces performance.
 
 ## Updating datasets
 
@@ -74,7 +79,8 @@ The script DataUpdater.py updates the datasets. The following sources are used:
 ## Performance
 
 The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my computer (Intel i5-1035G7, 8GB, SSD).
-Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms.
+Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms 
+without the NLP step and 20 ms with the NLP step. 
 
 ## API
 

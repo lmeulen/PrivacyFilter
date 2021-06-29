@@ -6,11 +6,12 @@ from pydantic import BaseModel
 privacyFilterApp = FastAPI()
 
 pfilter = PrivacyFilter()
-pfilter.initialize()
+pfilter.initialize(clean_accents=True, nlp_filter=True)
 
 
 class Parameter(BaseModel):
     text: str
+    use_nlp: bool
 
 
 @privacyFilterApp.get("/")
@@ -21,7 +22,7 @@ async def root():
 @privacyFilterApp.post("/filter")
 async def filtertext(item: Parameter):
     item_dict = item.dict()
-    filtered_text = pfilter.filter(item.text)
+    filtered_text = pfilter.filter(item.text, nlp_filter=item.use_nlp)
     item_dict.update({"filtered": filtered_text})
     return item_dict
 

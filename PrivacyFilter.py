@@ -3,7 +3,7 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-
+import nl_core_news_lg
 
 class PrivacyFilter:
 
@@ -12,7 +12,10 @@ class PrivacyFilter:
         self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
         self.url_re = None
         self.initialised = False
+        self.clean_accents = True
         self.nr_keywords = 0
+        self.nlp = None
+        self.use_nlp=False
 
     def file_to_list(self, filename, minimum_length=0, drop_first=1):
         with open(filename, encoding='latin') as f:
@@ -23,7 +26,7 @@ class PrivacyFilter:
             lst = list(filter(lambda item: len(item) > minimum_length, lst))
         return lst[drop_first:]
 
-    def initialize(self):
+    def initialize(self, clean_accents=True, nlp_filter=True):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
@@ -38,10 +41,12 @@ class PrivacyFilter:
                 self.keyword_processor_case_insensitive.add_keyword(name + c, '<PLAATS>' + c)
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
+            for c in ['.', ',', ' ', ':', ';', '?', '!']:
+                self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
 
         for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
+            for c in ['.', ',', ' ', ':', ';', '?', '!']:
+                self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
 
         for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
             self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
@@ -81,6 +86,11 @@ class PrivacyFilter:
                                                                r'(?:[/?#][^\s]*)?'  # resource path
             , re.IGNORECASE)
 
+        if nlp_filter:
+            self.nlp = nl_core_news_lg.load()
+            self.use_nlp = True
+
+        self.clean_accents = clean_accents
         self.initialised = True
 
     def remove_numbers(self, text, set_zero=True):
@@ -116,25 +126,70 @@ class PrivacyFilter:
         text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
         return str(text.decode("utf-8"))
 
-    def filter(self, inputtext, set_numbers_zero=True, remove_accents=True):
-        if not self.initialised:
-            self.initialize()
+    def doc2string(self, doc):
+        result = ""
+        prev = ""
+        for X in doc:
+            if not X.ent_type_:
+                result += X.text
+            else:
+                if prev == "<":
+                    result += X.text
+                else:
+                    result += "<" + X.ent_type_ + ">"
+            result += " "
+            prev = X.text
+        return result
 
-        # Add space at the beginning of the text and a dot t the end to assure all
-        # words are found, also if e.g. the sentence ends with a word and not a dot
-        # Both are removed at the end of this fucntion
-        text = " " + inputtext + "."
-        if remove_accents:
-            text = self.remove_accents(text)
+    def filter_keyword_processors(self, text):
+        text = self.keyword_processor_case_insensitive.replace_keywords(text)
+        text = self.keyword_processor_case_sensitive.replace_keywords(text)
+        return text
+
+    def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
         text = self.remove_dates(text)
         text = self.remove_email(text)
         text = self.remove_postal_codes(text)
         text = self.remove_numbers(text, set_numbers_zero)
+        return text
 
-        text = self.keyword_processor_case_insensitive.replace_keywords(text)
-        text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text[:-1].strip()
+    def filter_nlp(self, txt):
+        if not self.nlp:
+            self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
+        doc = self.nlp(txt)
+        txt = self.doc2string(doc)
+        return txt
+
+    def cleanup_text(self, txt):
+        result = txt
+        result = re.sub("< ", "<", result)
+        result = re.sub(" >", ">", result)
+        result = re.sub("<<", "<", result)
+        result = re.sub(">>", ">", result)
+        result = re.sub("<GPE>", "<LOCATIE>", result)
+        result = re.sub("<PERSON>", "<NAAM>", result)
+        result = re.sub("<NAAM> <NAAM>", "<NAAM>", result)
+        result = re.sub("<ADRES> <GETAL>", "<ADRES>", result)
+        result = re.sub(" ([ ,.:;?!])", "\\1", result)
+        result = result.strip()
+        return result
+
+    def filter(self, inputtext, set_numbers_zero=False, nlp_filter=True):
+        if not self.initialised:
+            self.initialize()
+
+        text = inputtext
+
+        if self.clean_accents:
+            text = self.remove_accents(text)
+
+        text = self.filter_regular_expressions(text, set_numbers_zero)
+        text = self.filter_keyword_processors(text)
+        if nlp_filter:
+            text = self.filter_nlp(text)
+
+        return self.cleanup_text(text)
 
 
 def insert_newlines(string, every=64):
@@ -163,14 +218,14 @@ def main():
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize()
+    pfilter.initialize(clean_accents=True, nlp_filter=True)
     print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
     print('Number of forbidden words : ' + str(pfilter.nr_keywords))
 
     start = time.time()
-    nr_sentences = 1000
+    nr_sentences = 100
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False, remove_accents=True)
+        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=True)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
