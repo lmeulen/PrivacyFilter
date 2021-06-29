@@ -157,7 +157,7 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "heparine (https://host.com/dfgr/dfdew ) voor. Simòne."
+          "heparine (https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
 
     print(insert_newlines(zin, 120))
 
