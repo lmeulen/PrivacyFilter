@@ -42,7 +42,7 @@ For using the API:
 - Uvicorn
 
 And for downloading and creating new datafiles
-- Osmnx
+- Osmnx (if pip/conda install fails, download code from github and put in proejct directory)
 - Pandas
 - GeoPandas
 - Numpy
