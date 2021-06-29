@@ -81,9 +81,11 @@ The script DataUpdater.py updates the datasets. The following sources are used:
 
 ## Performance
 
-The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my computer (Intel i5-1035G7, 8GB, SSD).
+The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds on my computer 
+(Intel i5-1035G7, 8GB, SSD).
+
 Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms 
-without the NLP step and 20 ms with the NLP step. 
+without the NLP step and 20 ms with the NLP step. With NLP, initialisation time increases to 11 seconds.
 
 ## API
 
