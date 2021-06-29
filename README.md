@@ -32,7 +32,10 @@ Named Entity REcognition with Spacy (optional)
 ## Dependencies
 For using the PrivacyFilter class:
 - FlashText
-- Spacy, inclusief nl_core_news_lg
+- Spacy, inclusief nl_core_news_lg 
+
+Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
+to use the NLP filter.
 
 For using the API:
 - FastAPI
