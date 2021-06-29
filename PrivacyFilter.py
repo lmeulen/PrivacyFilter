@@ -5,6 +5,7 @@ import unicodedata
 from flashtext import KeywordProcessor
 import nl_core_news_lg
 
+
 class PrivacyFilter:
 
     def __init__(self):
@@ -15,7 +16,7 @@ class PrivacyFilter:
         self.clean_accents = True
         self.nr_keywords = 0
         self.nlp = None
-        self.use_nlp=False
+        self.use_nlp = False
 
     def file_to_list(self, filename, minimum_length=0, drop_first=1):
         with open(filename, encoding='latin') as f:
