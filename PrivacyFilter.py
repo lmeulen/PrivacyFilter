@@ -43,11 +43,11 @@ class PrivacyFilter:
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
+                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
 
         for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name, '<NAAM>')
+                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
 
         for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
             self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
@@ -84,8 +84,8 @@ class PrivacyFilter:
             r'(?:\S+(?::\S*)?@)?'  # user:pass authentication 
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'  # localhost or ip
                                                                r'(?::\d{2,5})?'  # optional port
-                                                               r'(?:[/?#][^\s]*)?'  # resource path
-            , re.IGNORECASE)
+                                                               r'(?:[/?#][^\s]*)?',  # resource path
+            re.IGNORECASE)
 
         if nlp_filter:
             self.nlp = nl_core_news_lg.load()
@@ -94,25 +94,30 @@ class PrivacyFilter:
         self.clean_accents = clean_accents
         self.initialised = True
 
-    def remove_numbers(self, text, set_zero=True):
+    @staticmethod
+    def remove_numbers(text, set_zero=True):
         if set_zero:
             return re.sub('\d', '0', text).strip()
         else:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
 
-    def remove_dates(self, text):
+    @staticmethod
+    def remove_dates(text):
         text = re.sub("\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)([- /.]{,2}(\d{4}|\d{2})){,1})(?P<n>\D)(?![^<]*>)",
+            "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
+            "([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)(?![^<]*>)",
             "<DATUM> ", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2})){,1})(?P<n>\D)(?![^<]*>)",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)"
+            "(?![^<]*>)",
             "<DATUM> ", text)
         return text
 
-    def remove_email(self, text):
+    @staticmethod
+    def remove_email(text):
         return re.sub("(([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))(?![^<]*>)",
                       "<EMAIL>",
                       text)
@@ -120,14 +125,17 @@ class PrivacyFilter:
     def remove_url(self, text):
         return re.sub(self.url_re, "<URL>", text)
 
-    def remove_postal_codes(self, text):
+    @staticmethod
+    def remove_postal_codes(text):
         return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
 
-    def remove_accents(self, text):
+    @staticmethod
+    def remove_accents(text):
         text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
         return str(text.decode("utf-8"))
 
-    def doc2string(self, doc):
+    @staticmethod
+    def doc2string(doc):
         result = ""
         prev = ""
         for X in doc:
@@ -162,7 +170,8 @@ class PrivacyFilter:
         txt = self.doc2string(doc)
         return txt
 
-    def cleanup_text(self, txt):
+    @staticmethod
+    def cleanup_text(txt):
         result = txt
         result = re.sub("< ", "<", result)
         result = re.sub(" >", ">", result)
@@ -193,19 +202,33 @@ class PrivacyFilter:
         return self.cleanup_text(text)
 
 
-def insert_newlines(string, every=64):
+def insert_newlines(string, every=64, window=10):
     """
-    Insert a new line every n characters.
+    Insert a new line every n characters. If possible, break
+    the sentence at a space close to the cutoff point.
     Parameters
     ----------
     string Text to adapt
-    every After each <every> character, insert a newline
+    every Maximum length of each line
+    window The window to look for a space
 
     Returns
     -------
     Adapted string
     """
-    return '\n'.join(string[i:i + every] for i in range(0, len(string), every))
+    result = ""
+    from_string = string
+    while len(from_string) > 0:
+        cut_off = every
+        if len(from_string) > every:
+            while (from_string[cut_off - 1] != ' ') and (cut_off > (every - window)):
+                cut_off -= 1
+        else:
+            cut_off = len(from_string)
+        part = from_string[:cut_off]
+        result += part + '\n'
+        from_string = from_string[cut_off:]
+    return result[:-1]
 
 
 def main():
