@@ -189,7 +189,7 @@ class PrivacyFilter:
         if not self.initialised:
             self.initialize()
 
-        text = inputtext
+        text = " " + inputtext + " "
 
         if self.clean_accents:
             text = self.remove_accents(text)
