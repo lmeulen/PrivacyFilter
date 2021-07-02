@@ -144,10 +144,10 @@ if __name__ == "__main__":
             cells = row.find_all("td")
             if len(cells) == 4:
                 naam = cells[0].text.strip()
-                naam = re.sub("\[.*\]", "", naam)
+                naam = re.sub("\[.*", "", naam)
                 lst.append(naam)
-                naam = re.sub("\(.*", "", naam)
                 naam = cells[1].text.strip()
+                naam = re.sub("\(.*", "", naam)
                 lst.append(naam)
                 lst.append(cells[3].text.strip().split(":")[1].split('/')[0].strip())
     countries = pd.DataFrame(lst, columns=['land']).drop_duplicates()
