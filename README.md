@@ -93,7 +93,7 @@ The class PrivacyFilterAPI implements an HTTPS REST service around the PrivacyFi
 using the API, a key-pair must be generated using GenerateCertificate.py.
 
 ~~~~
-python3 PrivacyFilterAPI
+python3 PrivacyFilterAPI.py
 ~~~~
 
 After starting the API, a service is created at https://localhost:8000. The documentation for this 
