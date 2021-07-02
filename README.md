@@ -32,7 +32,7 @@ Named Entity REcognition with Spacy (optional)
 ## Dependencies
 For using the PrivacyFilter class:
 - FlashText
-- Spacy, inclusief nl_core_news_lg 
+- Spacy, including nl_core_news_lg 
 
 Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
 to use the NLP filter.
@@ -42,11 +42,11 @@ For using the API:
 - Uvicorn
 
 And for downloading and creating new datafiles
-- Osmnx (if pip/conda install fails, download code from github and put in proejct directory)
+- Osmnx (if pip/conda install fails, download code from GitHub and put in project directory)
 - Pandas
 - GeoPandas
 - Numpy
-- BeautifoulSoup
+- BeautifulSoup
 - cbsodata
 
 ## Example usage
@@ -65,7 +65,7 @@ The option set_number_zero determines whether numbers are replaced by the tag <N
 replaced by zeros. Setting the option remove_accents assures all accents are removed before 
 executing the filtering.  
 The option clean_accents determines if all accents are removed from the text to filter before
-filtering. The option nlp_filter determines whether or not to run the Spacy model. Using this
+filtering. The option nlp_filter determines whether to run the Spacy model. Using this
 model increases accuracy but reduces performance.
 
 ## Updating datasets
@@ -89,7 +89,7 @@ without the NLP step and 20 ms with the NLP step. With NLP, initialisation time 
 
 ## API
 
-The class PrivacyFilterAPI implements a HTTPS REST service around the PrivacyFilter class. Before 
+The class PrivacyFilterAPI implements an HTTPS REST service around the PrivacyFilter class. Before 
 using the API, a key-pair must be generated using GenerateCertificate.py.
 
 ~~~~
