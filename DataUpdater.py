@@ -9,7 +9,6 @@ import geopandas as gpd
 import numpy as np
 import xml.etree.ElementTree as ElementTree
 from bs4 import BeautifulSoup
-# TODO: REduce the number of dependencies (like pandas, geopandas, ...)
 
 if __name__ == "__main__":
 
