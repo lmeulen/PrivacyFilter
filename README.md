@@ -1,6 +1,9 @@
 # PrivacyFilter
 Privacy Filter for free text
 
+See also: [Remove personal informaton from a text with Python]("https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074")
+on [TowardsDataScience.com]("https://towardsdatascience.com").
+
 This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
 and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
 
