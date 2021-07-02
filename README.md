@@ -35,7 +35,7 @@ For using the PrivacyFilter class:
 - Spacy, including nl_core_news_lg 
 
 Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
-to use the NLP filter.
+to use the NLP filter. This is not needed when installing dependencies from the requirements.txt with pip.
 
 For using the API:
 - FastAPI
