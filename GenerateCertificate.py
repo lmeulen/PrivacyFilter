@@ -8,6 +8,7 @@ def generate_certificate(
         duration=(365 * 24 * 60 * 60),
         keyfilename="key.pem",
         certfilename="cert.pem"):
+
     k = crypto.PKey()
     k.generate_key(crypto.TYPE_RSA, 4096)
 
@@ -18,6 +19,7 @@ def generate_certificate(
     cert.gmtime_adj_notBefore(0)
     cert.gmtime_adj_notAfter(duration)
     cert.set_issuer(cert.get_subject())
+
     cert.set_pubkey(k)
     cert.sign(k, 'sha512')
 
