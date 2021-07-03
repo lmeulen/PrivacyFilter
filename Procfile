@@ -1,1 +1,1 @@
-web: uvicorn -w 4 -k uvicorn.workers.UvicornWorker PrivacyFilterAPI:privacyFilterApp
+web: uvicorn PrivacyFilterAPI:privacyFilterApp
