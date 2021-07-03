@@ -6,7 +6,7 @@ from pydantic import BaseModel
 privacyFilterApp = FastAPI()
 
 pfilter = PrivacyFilter()
-pfilter.initialize(clean_accents=True, nlp_filter=True)
+pfilter.initialize(clean_accents=True, nlp_filter=False)
 
 
 class Parameter(BaseModel):
