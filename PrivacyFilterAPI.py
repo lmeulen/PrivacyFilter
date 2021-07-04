@@ -23,11 +23,10 @@ async def root():
 @privacyFilterApp.post("/filter")
 async def filtertext(item: Parameter):
     starttime = time.time()
-    item_dict = item.dict()
     filtered_text = pfilter.filter(item.text, nlp_filter=item.use_nlp)
-    item_dict.update({"filtered": filtered_text})
-    item_dict.update({"time": time.time() - starttime})
-    return item_dict
+    return {"text": filtered_text,
+            "time": time.time() - starttime}
+
 
 if __name__ == '__main__':
     uvicorn.run("PrivacyFilterAPI:privacyFilterApp",
