@@ -6,7 +6,7 @@ from pydantic import BaseModel
 privacyFilterApp = FastAPI()
 
 pfilter = PrivacyFilter()
-pfilter.initialize(clean_accents=True, nlp_filter=False)
+pfilter.initialize(clean_accents=True, nlp_filter=True)
 
 
 class Parameter(BaseModel):
@@ -33,4 +33,7 @@ if __name__ == '__main__':
     uvicorn.run("PrivacyFilterAPI:privacyFilterApp",
                 host="0.0.0.0",
                 port=8000,
-                reload=True)
+                reload=True,
+                ssl_keyfile="./key.pem",
+                ssl_certfile="./cert.pem"
+                )
