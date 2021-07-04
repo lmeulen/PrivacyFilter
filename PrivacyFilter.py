@@ -34,9 +34,9 @@ class PrivacyFilter:
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-        for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
+        # for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
+        #     for c in ['.', ',', ' ', ':', ';', '?', '!']:
+        #         self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
 
         for name in self.file_to_list(os.path.join('datasets', 'places.csv')):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
