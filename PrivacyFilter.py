@@ -3,8 +3,8 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-# import nl_core_news_lg
-import nl_core_news_sm
+import nl_core_news_lg
+#import nl_core_news_sm
 
 
 class PrivacyFilter:
@@ -89,8 +89,8 @@ class PrivacyFilter:
             re.IGNORECASE)
 
         if nlp_filter:
-            # self.nlp = nl_core_news_lg.load()
-            self.nlp = nl_core_news_sm.load()
+            self.nlp = nl_core_news_lg.load()
+            # self.nlp = nl_core_news_sm.load()
             self.use_nlp = True
 
         self.clean_accents = clean_accents
