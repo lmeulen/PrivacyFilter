@@ -1,3 +1,4 @@
+import time
 import uvicorn
 from fastapi import FastAPI
 from PrivacyFilter import PrivacyFilter
@@ -21,10 +22,11 @@ async def root():
 
 @privacyFilterApp.post("/filter")
 async def filtertext(item: Parameter):
-    item_dict = item.dict()
+    starttime = time.time()
     filtered_text = pfilter.filter(item.text, nlp_filter=item.use_nlp)
-    item_dict.update({"filtered": filtered_text})
-    return item_dict
+    return {"text": filtered_text,
+            "time": time.time() - starttime}
+
 
 if __name__ == '__main__':
     uvicorn.run("PrivacyFilterAPI:privacyFilterApp",
