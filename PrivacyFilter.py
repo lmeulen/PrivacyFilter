@@ -10,8 +10,7 @@ import nl_core_news_lg
 class PrivacyFilter:
 
     def __init__(self):
-        self.keyword_processor_case_sensitive = KeywordProcessor(case_sensitive=True)
-        self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor = KeywordProcessor(case_sensitive=False)
         self.url_re = None
         self.initialised = False
         self.clean_accents = True
@@ -39,7 +38,6 @@ class PrivacyFilter:
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
 
-        cases = [self.keyword_processor_case_insensitive, self.keyword_processor_case_sensitive]
         fields = {
             os.path.join('datasets', 'firstnames.csv'): "<NAAM>",
             os.path.join('datasets', 'lastnames.csv'): "<NAAM>",
@@ -51,15 +49,13 @@ class PrivacyFilter:
             os.path.join('datasets', 'countries.csv'): "<LAND>",
         }
 
-        #TODO: niet alles moet bij case sensitive en case insensitive
         for field in fields:
             for name in self.file_to_list(field):
                 for c in self._punctuation:
-                    for case in cases:
-                        case.add_keyword(
-                            "{n}{c}".format(n=name, c=c),
-                            "<{n}> {c}".format(n=fields[field], c=c)
-                        )
+                    self.keyword_processor.add_keyword(
+                        "{n}{c}".format(n=name, c=c),
+                        "<{n}> {c}".format(n=fields[field], c=c)
+                    )
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -153,8 +149,7 @@ class PrivacyFilter:
 
     def filter_keyword_processors(self, text):
         text += " "  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
-        text = self.keyword_processor_case_insensitive.replace_keywords(text)
-        #text = self.keyword_processor_case_sensitive.replace_keywords(text)
+        text = self.keyword_processor.replace_keywords(text)
         return text[:-1]  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
