@@ -3,7 +3,7 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-import nl_core_news_lg
+# import nl_core_news_lg
 #import nl_core_news_sm
 
 
@@ -34,6 +34,7 @@ class PrivacyFilter:
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
+        print('Initializing')
         for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
             for c in ['.', ',', ' ', ':', ';', '?', '!']:
                 self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
@@ -109,13 +110,12 @@ class PrivacyFilter:
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            "([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)(?![^<]*>)",
-            "<DATUM> ", text)
+            "([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)"
-            "(?![^<]*>)",
-            "<DATUM> ", text)
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
         return text
 
     @staticmethod
@@ -129,7 +129,7 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_postal_codes(text):
-        return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
+        return re.sub("[0-9]{4}[ ]?[A-Z]{2}(([ ,.:;])?)", "<POSTCODE>\\1", text)
 
     @staticmethod
     def remove_accents(text):
@@ -155,7 +155,7 @@ class PrivacyFilter:
     def filter_keyword_processors(self, text):
         text = self.keyword_processor_case_insensitive.replace_keywords(text)
         text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text
+        return text.strip()
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
@@ -197,6 +197,7 @@ class PrivacyFilter:
             text = self.remove_accents(text)
 
         text = self.filter_regular_expressions(text, set_numbers_zero)
+        text = " " + text + " "
         text = self.filter_keyword_processors(text)
         if nlp_filter:
             text = self.filter_nlp(text)
@@ -238,20 +239,20 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
+          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan. Ik heet Melvin en woon in Beverwijk."
 
     print(insert_newlines(zin, 120))
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize(clean_accents=True, nlp_filter=True)
+    pfilter.initialize(clean_accents=True, nlp_filter=False)
     print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
     print('Number of forbidden words : ' + str(pfilter.nr_keywords))
 
     start = time.time()
     nr_sentences = 100
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=True)
+        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=False)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
