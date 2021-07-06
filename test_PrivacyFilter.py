@@ -30,9 +30,14 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
 
 class PFTest(unittest.TestCase):
     def setUp(self):
-        pass
         self.pfilter = PrivacyFilter()
         self.pfilter.initialize(clean_accents=True, nlp_filter=False)
+
+
+class TestAccents(PFTest):
+    def test_clean_accents(self):
+        for sample in file_to_samples("accents.txt"):
+            run_test_function_with_data(self, self.pfilter.remove_accents, sample)
 
 
 class TestRegex(PFTest):
