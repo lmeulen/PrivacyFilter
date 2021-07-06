@@ -4,14 +4,16 @@ import os
 import unicodedata
 from flashtext import KeywordProcessor
 import nl_core_news_lg
-#import nl_core_news_sm
+
+
+# import nl_core_news_sm
 
 
 class PrivacyFilter:
 
     def __init__(self):
-        self.keyword_processor_case_sensitive = KeywordProcessor(case_sensitive=True)
-        self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
         self.url_re = None
         self.initialised = False
         self.clean_accents = True
@@ -19,7 +21,10 @@ class PrivacyFilter:
         self.nlp = None
         self.use_nlp = False
 
-    def file_to_list(self, filename, minimum_length=0, drop_first=1):
+        ##### CONSTANTS #####
+        self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+
+    def file_to_list(self, filename, minimum_length=0, drop_first=True):
         with open(filename, encoding='latin') as f:
             lst = [line.rstrip() for line in f]
         lst = list(dict.fromkeys(lst))
@@ -34,59 +39,80 @@ class PrivacyFilter:
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-        for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
 
-        for name in self.file_to_list(os.path.join('datasets', 'places.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<PLAATS>' + c)
+        fields = {
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+            os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+            os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+            os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+            os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+            os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+        }
+
+        for field in fields:
+            # If there is a punctuation list, use it.
+            if fields[field]["punctuation"] is not None:
+                for name in self.file_to_list(field):
+                    for c in self._punctuation:
+                        self.keyword_processor.add_keyword(
+                            "{n}{c}".format(n=name, c=c),
+                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                        )
+            else:
+                for name in self.file_to_list(field):
+                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
-
-        for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<MEDICIJN>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<NATIONALITEIT>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'countries.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<LAND>')
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
-        ul = '\u00a1-\uffff'  # unicode letters range (must not be a raw string)
+        ul = '\u00a1-\uffff'  # Unicode letters range (must not be a raw string).
+
         # IP patterns
-        ipv4_re = r'(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}'
-        ipv6_re = r'\[[0-9a-f:\.]+\]'
+        ipv4_re = r'(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}'
+        ipv6_re = r'\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,'\
+                  r'4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{'\
+                  r'1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,'\
+                  r'3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|['\
+                  r'1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,'\
+                  r'2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|((['\
+                  r'0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:['\
+                  r'0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,'\
+                  r'5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?'
+
+
         # Host patterns
         hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
-        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'  # domain names have max length of 63 characters
+        # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
+        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
         tld_re = (
-                r'\.'  # dot 
-                r'(?!-)'  # can't start with a dash 
-                r'(?:[a-z' + ul + '-]{2,63}'  # domain label 
-                                  r'|xn--[a-z0-9]{1,59})'  # or punycode label 
-                                  r'(?<!-)'  # can't end with a dash 
-                                  r'\.?'  # may have a trailing dot
+                r'\.'                                # dot
+                r'(?!-)'                             # can't start with a dash
+                r'(?:[a-z' + ul + '-]{2,63}'         # domain label
+                r'|xn--[a-z0-9]{1,59})'              # or punycode label
+                r'(?<!-)'                            # can't end with a dash
+                r'\.?'                               # may have a trailing dot
         )
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
+
         self.url_re = re.compile(
-            r'(?:http|ftp)s?://'  # http(s):// or ftp(s)://
-            r'(?:\S+(?::\S*)?@)?'  # user:pass authentication 
-            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'  # localhost or ip
-                                                               r'(?::\d{2,5})?'  # optional port
-                                                               r'(?:[/?#][^\s]*)?',  # resource path
-            re.IGNORECASE)
+            r'^((?:[a-z0-9.+-]*):?//)?'                                 # scheme is validated separately
+            r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
+            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
+            r'(?::\d{2,5})?'                                            # port
+            r'(?:[/?#][^\s]*)?'                                         # resource path
+            r'\Z',
+            re.IGNORECASE
+        )
 
         if nlp_filter:
             self.nlp = nl_core_news_lg.load()
@@ -125,7 +151,11 @@ class PrivacyFilter:
                       text)
 
     def remove_url(self, text):
-        return re.sub(self.url_re, "<URL>", text)
+        filtered = []
+        for chunk in text.split(" "):
+            filtered.append(re.sub(self.url_re, "<URL>", chunk))
+
+        return " ".join(filtered)
 
     @staticmethod
     def remove_postal_codes(text):
@@ -153,9 +183,10 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text = self.keyword_processor_case_insensitive.replace_keywords(text)
-        text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text
+        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
+        text = self.keyword_processor.replace_keywords(text)
+        text = self.keyword_processor_names.replace_keywords(text)
+        return text[:-1]  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
