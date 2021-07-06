@@ -4,13 +4,16 @@ import os
 import unicodedata
 from flashtext import KeywordProcessor
 import nl_core_news_lg
-#import nl_core_news_sm
+
+
+# import nl_core_news_sm
 
 
 class PrivacyFilter:
 
     def __init__(self):
         self.keyword_processor = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
         self.url_re = None
         self.initialised = False
         self.clean_accents = True
@@ -30,7 +33,6 @@ class PrivacyFilter:
             lst = list(filter(lambda item: len(item) > minimum_length, lst))
         return lst[drop_first:]
 
-
     def initialize(self, clean_accents=True, nlp_filter=True):
 
         # Add words with an append character to prevent replacing partial words by tags.
@@ -39,23 +41,34 @@ class PrivacyFilter:
         # implementation of a token based algorithm.
 
         fields = {
-            os.path.join('datasets', 'firstnames.csv'): "<NAAM>",
-            os.path.join('datasets', 'lastnames.csv'): "<NAAM>",
-            os.path.join('datasets', 'streets_Nederland.csv'): "<ADRES>",
-            os.path.join('datasets', 'places.csv'): "<PLAATS>",
-            os.path.join('datasets', 'diseases.csv'): "<AANDOENING>",
-            os.path.join('datasets', 'medicines.csv'): "<MEDICIJN>",
-            os.path.join('datasets', 'nationalities.csv'): "<NATIONALITEIT>",
-            os.path.join('datasets', 'countries.csv'): "<LAND>",
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+            os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+            os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+            os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+            os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+            os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
         }
 
         for field in fields:
-            for name in self.file_to_list(field):
-                for c in self._punctuation:
-                    self.keyword_processor.add_keyword(
-                        "{n}{c}".format(n=name, c=c),
-                        "<{n}> {c}".format(n=fields[field], c=c)
-                    )
+            # If there is a punctuation list, use it.
+            if fields[field]["punctuation"] is not None:
+                for name in self.file_to_list(field):
+                    for c in self._punctuation:
+                        self.keyword_processor.add_keyword(
+                            "{n}{c}".format(n=name, c=c),
+                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                        )
+            else:
+                for name in self.file_to_list(field):
+                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
+
+        for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
+
+        for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -148,8 +161,9 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text += " "  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
+        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
         text = self.keyword_processor.replace_keywords(text)
+        text = self.keyword_processor_names.replace_keywords(text)
         return text[:-1]  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
