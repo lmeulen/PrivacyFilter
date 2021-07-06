@@ -64,29 +64,47 @@ class PrivacyFilter:
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
-        ul = '\u00a1-\uffff'  # unicode letters range (must not be a raw string)
+        ul = '\u00a1-\uffff'  # Unicode letters range (must not be a raw string).
+
         # IP patterns
-        ipv4_re = r'(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)(?:\.(?:25[0-5]|2[0-4]\d|[0-1]?\d?\d)){3}'
-        ipv6_re = r'\[[0-9a-f:\.]+\]'
+        ipv4_re = r'(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}'
+        ipv6_re = r'\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,'\
+                  r'4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{'\
+                  r'1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,'\
+                  r'3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|['\
+                  r'1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,'\
+                  r'2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|((['\
+                  r'0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:['\
+                  r'0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,'\
+                  r'5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?'
+
+
         # Host patterns
         hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
-        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'  # domain names have max length of 63 characters
+        # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
+        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
         tld_re = (
-                r'\.'  # dot 
-                r'(?!-)'  # can't start with a dash 
-                r'(?:[a-z' + ul + '-]{2,63}'  # domain label 
-                                  r'|xn--[a-z0-9]{1,59})'  # or punycode label 
-                                  r'(?<!-)'  # can't end with a dash 
-                                  r'\.?'  # may have a trailing dot
+                r'\.'                                # dot
+                r'(?!-)'                             # can't start with a dash
+                r'(?:[a-z' + ul + '-]{2,63}'         # domain label
+                r'|xn--[a-z0-9]{1,59})'              # or punycode label
+                r'(?<!-)'                            # can't end with a dash
+                r'\.?'                               # may have a trailing dot
         )
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
+
         self.url_re = re.compile(
-            r'(?:http|ftp)s?://'  # http(s):// or ftp(s)://
-            r'(?:\S+(?::\S*)?@)?'  # user:pass authentication 
-            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'  # localhost or ip
-                                                               r'(?::\d{2,5})?'  # optional port
-                                                               r'(?:[/?#][^\s]*)?',  # resource path
-            re.IGNORECASE)
+            r'^((?:[a-z0-9.+-]*):?//)?'                                 # scheme is validated separately
+            r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
+            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
+            r'(?::\d{2,5})?'                                            # port
+            r'(?:[/?#][^\s]*)?'                                         # resource path
+            r'\Z',
+            re.IGNORECASE
+        )
 
         if nlp_filter:
             self.nlp = nl_core_news_lg.load()
@@ -125,7 +143,11 @@ class PrivacyFilter:
                       text)
 
     def remove_url(self, text):
-        return re.sub(self.url_re, "<URL>", text)
+        filtered = []
+        for chunk in text.split(" "):
+            filtered.append(re.sub(self.url_re, "<URL>", chunk))
+
+        return " ".join(filtered)
 
     @staticmethod
     def remove_postal_codes(text):
