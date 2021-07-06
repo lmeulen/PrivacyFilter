@@ -32,5 +32,15 @@ class TestRegex(PFTest):
             dirty, clean = sample
             self.assertEqual(self.pfilter.remove_dates(dirty), clean)
 
+    def test_postal_codes(self):
+        for sample in file_to_samples("postal_codes.txt"):
+            dirty, clean = sample
+            self.assertEqual(self.pfilter.remove_postal_codes(dirty), clean)
+
+    def test_numbers(self):
+        for sample in file_to_samples("numbers.txt"):
+            dirty, clean = sample
+            self.assertEqual(self.pfilter.remove_numbers(dirty), clean)
+
 if __name__ == '__main__':
     unittest.main()
