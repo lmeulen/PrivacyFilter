@@ -1,12 +1,29 @@
 import unittest
+
 from PrivacyFilter import PrivacyFilter
 
 
-def file_to_samples(file, dir="test_samples", delimiter="~"):
-    with open("{dir}/{file}".format(dir=dir,file=file)) as f:
+def file_to_samples(file, directory="test_samples", delimiter="~"):
+    with open("{dir}/{file}".format(dir=directory, file=file)) as f:
         for line in f.readlines():
             line = line.rstrip()
             yield tuple(line.split(delimiter))
+
+
+def run_test_function_with_data(self, function, sample, *args, **kwargs):
+    dirty, clean = sample
+    result = function(dirty, args, kwargs)
+    self.assertEqual(
+        result,
+        clean,
+        msg="\r\n\"{input}\" failed.\r\n"
+            "Filtered output was: \"{output}\".\r\n"
+            "Filtered output should have been: \"{correct}\"".format(
+                input=dirty,
+                correct=clean,
+                output=result
+            )
+    )
 
 
 class PFTest(unittest.TestCase):
@@ -19,28 +36,24 @@ class PFTest(unittest.TestCase):
 class TestRegex(PFTest):
     def test_url(self):
         for sample in file_to_samples("url.txt"):
-            dirty, clean = sample
-            self.assertEqual(self.pfilter.remove_url(dirty), clean)
+            run_test_function_with_data(self, self.pfilter.remove_url, sample)
 
     def test_email(self):
         for sample in file_to_samples("email.txt"):
-            dirty, clean = sample
-            self.assertEqual(self.pfilter.remove_email(dirty), clean)
+            run_test_function_with_data(self, self.pfilter.remove_email, sample)
 
     def test_date(self):
         for sample in file_to_samples("date.txt"):
-            dirty, clean = sample
-            self.assertEqual(self.pfilter.remove_dates(dirty), clean)
+            run_test_function_with_data(self, self.pfilter.remove_dates, sample)
 
     def test_postal_codes(self):
         for sample in file_to_samples("postal_codes.txt"):
-            dirty, clean = sample
-            self.assertEqual(self.pfilter.remove_postal_codes(dirty), clean)
+            run_test_function_with_data(self, self.pfilter.remove_postal_codes, sample)
 
     def test_numbers(self):
         for sample in file_to_samples("numbers.txt"):
-            dirty, clean = sample
-            self.assertEqual(self.pfilter.remove_numbers(dirty), clean)
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample)
+
 
 if __name__ == '__main__':
     unittest.main()
