@@ -1,0 +1,6 @@
+De datum is 24-01-2011~De datum is <DATUM>
+De datum is 24-01-2011 (of 24 jan 21 of 24 januari 2011).~De datum is <DATUM> (of <DATUM> of <DATUM>).
+het is 15 januari~het is <DATUM>
+op 1 januari 2022 bestaat de aarde 2022 jaar.~op <DATUM> bestaat de aarde 2022 jaar.
+1 januari 2021~<DATUM>
+15 decimalen~15 decimalen
