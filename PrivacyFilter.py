@@ -3,9 +3,7 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-import nl_core_news_lg
-
-
+# import nl_core_news_lg
 # import nl_core_news_sm
 
 
@@ -58,7 +56,7 @@ class PrivacyFilter:
                     for c in self._punctuation:
                         self.keyword_processor.add_keyword(
                             "{n}{c}".format(n=name, c=c),
-                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                            "{n}{c}".format(n=fields[field]["replacement"], c=c)
                         )
             else:
                 for name in self.file_to_list(field):
@@ -135,13 +133,12 @@ class PrivacyFilter:
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            "([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)(?![^<]*>)",
-            "<DATUM> ", text)
+            "([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)"
-            "(?![^<]*>)",
-            "<DATUM> ", text)
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
         return text
 
     @staticmethod
@@ -159,7 +156,7 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_postal_codes(text):
-        return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
+        return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;]?)", "<POSTCODE>\\1", text)
 
     @staticmethod
     def remove_accents(text):
@@ -186,12 +183,12 @@ class PrivacyFilter:
         text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
         text = self.keyword_processor.replace_keywords(text)
         text = self.keyword_processor_names.replace_keywords(text)
-        return text[:-1]  # Remove the trailing space
+        return text.strip()  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
+        text = self.remove_email(text)
         text = self.remove_url(text)
         text = self.remove_dates(text)
-        text = self.remove_email(text)
         text = self.remove_postal_codes(text)
         text = self.remove_numbers(text, set_numbers_zero)
         return text
@@ -269,7 +266,7 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
+          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan. Ik heet Melvin en woon in Beverwijk."
 
     print(insert_newlines(zin, 120))
 

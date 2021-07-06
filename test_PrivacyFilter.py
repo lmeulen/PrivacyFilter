@@ -87,22 +87,22 @@ class TestPrivacyFilter(TestCase):
         self.assertEqual("Ik woon aan de <ADRES>, in <PLAATS>.",
                          self.pfilter.filter_keyword_processors(
                              "Ik woon aan de Maasstraat, in Rotterdam."))
-        self.assertEqual("Mijn naam is <NAAM>.",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Kees."))
-        self.assertEqual("Mijn naam is <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Jantine"))
-        self.assertEqual("Mijn naam is <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Thomas"))
-        self.assertEqual("Mijn naam is thomas",
-                         self.pfilter.filter_keyword_processors("Mijn naam is thomas"))
-        self.assertEqual("Mijn naam is <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Thomas "))
-        self.assertEqual("Mijn naam is Thoms <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Thoms Janssen"))
-        self.assertEqual("Mijn naam is <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Janssen"))
-        self.assertEqual("Mijn naam is <NAAM> <NAAM>",
-                         self.pfilter.filter_keyword_processors("Mijn naam is Thomas Janssen"))
+        self.assertEqual("1 Mijn naam is <NAAM>.",
+                         self.pfilter.filter_keyword_processors("1 Mijn naam is Kees."))
+        self.assertEqual("2 Mijn naam is <NAAM>",
+                         self.pfilter.filter_keyword_processors("2 Mijn naam is Jantine "))
+        self.assertEqual("3 Mijn naam is <NAAM>",
+                         self.pfilter.filter_keyword_processors("3 Mijn naam is Thomas"))
+        self.assertEqual("4 Mijn naam is <NAAM>.",
+                         self.pfilter.filter_keyword_processors("4 Mijn naam is thomas."))
+        self.assertEqual("5 Mijn naam is <NAAM>",
+                         self.pfilter.filter_keyword_processors("5 Mijn naam is Thomas "))
+        self.assertEqual("6 Mijn naam is Thoms <NAAM>",
+                         self.pfilter.filter_keyword_processors("6 Mijn naam is Thoms Janssen"))
+        self.assertEqual("7 Mijn naam is <NAAM>",
+                         self.pfilter.filter_keyword_processors("7 Mijn naam is Janssen"))
+        self.assertEqual("8 Mijn naam is <NAAM> <NAAM>",
+                         self.pfilter.filter_keyword_processors("8 Mijn naam is Thomas Janssen"))
 
     def test_filter_regular_expressions(self):
         self.assertEqual("De PC is <POSTCODE>, url <URL> en mail <EMAIL>.",
@@ -111,14 +111,14 @@ class TestPrivacyFilter(TestCase):
 
     def test_cleanup_text(self):
         self.assertEqual("Mijn naam is <NAAM>",
-                         self.pfilter.filter_keyword_processors(" Mijn naam is <NAAM> "))
+                         self.pfilter.cleanup_text(" Mijn naam is <NAAM> "))
 
     def test_filter(self):
         zin = "De mogelijkheden zijn sinds 2014 groot geworden, zeker vergeleken met 2012, hè Kees? Het systeem " \
               "maakt verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (" \
               "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
               "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-              "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan. Ik heet Melvin  woon in Beverwijk."
+              "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan. Ik heet Piet  woon in Asten."
         res = "De mogelijkheden zijn sinds <GETAL> groot geworden, zeker vergeleken met <GETAL>, he <NAAM>? Het " \
               "systeem maakt verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is <DATUM> "\
               "(of <DATUM>). Ik ben te bereiken op <EMAIL> en woon in <PLAATS>. Mijn adres is <ADRES>, <POSTCODE>. "\
