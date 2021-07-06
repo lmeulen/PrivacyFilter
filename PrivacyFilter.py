@@ -3,8 +3,6 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-# import nl_core_news_lg
-# import nl_core_news_sm
 
 
 class PrivacyFilter:
@@ -74,47 +72,46 @@ class PrivacyFilter:
 
         # IP patterns
         ipv4_re = r'(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}'
-        ipv6_re = r'\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,'\
-                  r'4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{'\
-                  r'1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,'\
-                  r'3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|['\
-                  r'1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,'\
-                  r'2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|((['\
-                  r'0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:['\
-                  r'0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,'\
+        ipv6_re = r'\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,' \
+                  r'4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{' \
+                  r'1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[' \
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,' \
+                  r'3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[' \
+                  r'1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,' \
+                  r'2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([' \
+                  r'0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[' \
+                  r'0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[' \
+                  r'0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[' \
+                  r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,' \
                   r'5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?'
-
 
         # Host patterns
         hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
         # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
         domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
         tld_re = (
-                r'\.'                                # dot
-                r'(?!-)'                             # can't start with a dash
-                r'(?:[a-z' + ul + '-]{2,63}'         # domain label
-                r'|xn--[a-z0-9]{1,59})'              # or punycode label
-                r'(?<!-)'                            # can't end with a dash
-                r'\.?'                               # may have a trailing dot
+                r'\.'  # dot
+                r'(?!-)'  # can't start with a dash
+                r'(?:[a-z' + ul + '-]{2,63}'  # domain label
+                                  r'|xn--[a-z0-9]{1,59})'  # or punycode label
+                                  r'(?<!-)'  # can't end with a dash
+                                  r'\.?'  # may have a trailing dot
         )
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'^((?:[a-z0-9.+-]*):?//)?'                                 # scheme is validated separately
-            r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
+            r'^((?:[a-z0-9.+-]*):?//)?'  # scheme is validated separately
+            r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'  # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
-            r'(?::\d{2,5})?'                                            # port
-            r'(?:[/?#][^\s]*)?'                                         # resource path
-            r'\Z',
+                                                               r'(?::\d{2,5})?'  # port
+                                                               r'(?:[/?#][^\s]*)?'  # resource path
+                                                               r'\Z',
             re.IGNORECASE
         )
 
         if nlp_filter:
+            import nl_core_news_lg
             self.nlp = nl_core_news_lg.load()
-            # self.nlp = nl_core_news_sm.load()
             self.use_nlp = True
 
         self.clean_accents = clean_accents
@@ -126,6 +123,12 @@ class PrivacyFilter:
             return re.sub('\d', '0', text).strip()
         else:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
+
+    @staticmethod
+    def remove_times(text):
+        #text = re.sub("\d{1,2}:\d{2}", "<TIJD>", text)
+        text = re.sub('(\d{1,2})[.:](\d{1,2})?[ ]?(am|pm|AM|PM)?', '<TIJD>', text)
+        return text
 
     @staticmethod
     def remove_dates(text):
@@ -189,6 +192,7 @@ class PrivacyFilter:
         text = self.remove_email(text)
         text = self.remove_url(text)
         text = self.remove_dates(text)
+        text = self.remove_times(text)
         text = self.remove_postal_codes(text)
         text = self.remove_numbers(text, set_numbers_zero)
         return text

@@ -31,6 +31,16 @@ class TestPrivacyFilter(TestCase):
         self.assertEqual("<GETAL> punten",
                          self.pfilter.remove_numbers("10 punten", set_zero=False))
 
+    def test_remove_times(self):
+        self.assertEqual("De tijd is <TIJD>.",
+                         self.pfilter.remove_times("De tijd is 12:20."))
+        self.assertEqual("De tijd is <TIJD>.",
+                         self.pfilter.remove_times("De tijd is 1:20."))
+        self.assertEqual("De tijd is <TIJD>",
+                         self.pfilter.remove_times("De tijd is 1:20PM"))
+        self.assertEqual("De tijd is <TIJD>",
+                         self.pfilter.remove_times("De tijd is 1:20 am"))
+
     def test_remove_dates(self):
         self.assertEqual("De datum is <DATUM>.",
                          self.pfilter.remove_dates("De datum is 12 januari 2020."))
