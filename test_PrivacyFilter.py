@@ -14,6 +14,7 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
     dirty = " {} ".format(dirty)
     result = function(dirty, *args, **kwargs).strip()
+    result = self.pfilter.cleanup_text(result)
     self.assertEqual(
         result,
         clean,
