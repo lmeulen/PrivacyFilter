@@ -71,8 +71,20 @@ class TestKeywordProcessor(PFTest):
         for sample in file_to_samples("places.txt"):
             run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
 
+    def test_streets(self):
+        for sample in file_to_samples("streets.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
     def test_diseases(self):
         for sample in file_to_samples("diseases.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_countries(self):
+        for sample in file_to_samples("countries.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_nationalities(self):
+        for sample in file_to_samples("nationalities.txt"):
             run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
 
 if __name__ == '__main__':
