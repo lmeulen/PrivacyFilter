@@ -7,12 +7,13 @@ def file_to_samples(file, directory="test_samples", delimiter="~"):
     with open("{dir}/{file}".format(dir=directory, file=file)) as f:
         for line in f.readlines():
             line = line.rstrip()
-            yield tuple(line.split(delimiter))
+            yield line.split(delimiter)
 
 
 def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
-    result = function(dirty, *args, **kwargs)
+    dirty = " {} ".format(dirty)
+    result = function(dirty, *args, **kwargs).strip()
     self.assertEqual(
         result,
         clean,
@@ -52,7 +53,12 @@ class TestRegex(PFTest):
 
     def test_numbers(self):
         for sample in file_to_samples("numbers.txt"):
-            run_test_function_with_data(self, self.pfilter.remove_numbers, sample)
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=False)
+
+    def test_numbers_set_zero_true(self):
+        for sample in file_to_samples("numbers.txt"):
+            sample[1] = sample[1].replace("<GETAL>", "0")  # Use dataset from set_zero=False and replace <getal> wtih 0.
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
 
 
 if __name__ == '__main__':
