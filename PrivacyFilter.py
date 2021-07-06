@@ -126,7 +126,6 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_times(text):
-        #text = re.sub("\d{1,2}:\d{2}", "<TIJD>", text)
         text = re.sub('(\d{1,2})[.:](\d{1,2})?[ ]?(am|pm|AM|PM)?', '<TIJD>', text)
         return text
 
