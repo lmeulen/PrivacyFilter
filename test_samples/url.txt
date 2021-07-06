@@ -1,0 +1,37 @@
+http://domein.nl~<URL>
+https://domein.nl~<URL>
+ftp://domein.nl~<URL>
+://domein.nl~<URL>
+//domein.nl~<URL>
+nl.~nl.
+domein.nl~<URL>
+search.domein.nl~<URL>
+123456.vpn.domein.nl~<URL>
+149.112.112.112~<URL>
+9.9.9.9~<URL>
+2620:fe::fe~<URL>
+2620:fe::9~<URL>
+2001:1c04:120a:4400:69bb:d5ab:2b2b:2a3b~<URL>
+http://[2001:1c04:120a:4400:69bb:d5ab:2b2b:2a3b]~<URL>
+http://[2001:1c04:120a:4400:69bb:d5ab:2b2b:2a3b]/cool_dog_picture.png~<URL>
+[2001:1c04:120a:4400:69bb:d5ab:2b2b:2a3b]~<URL>
+hallo wereld~hallo wereld
+Mijn website is www.domein.nl~Mijn website is <URL>
+Mijn website is https://www.domein.nl~Mijn website is <URL>
+Mijn website is http://domein.nl~Mijn website is <URL>
+Mijn website is domein.nl~Mijn website is <URL>
+add http://mit.edu.com abc~add <URL> abc
+add www.google.be. uvw~add <URL> uvw
+add https://www.google.be. 123~add <URL> 123
+add www.website.gov.us test2~add <URL> test2
+Hey bob on www.test.com.~Hey bob on <URL>
+another test with ipv4 http://192.168.1.1/test.jpg. toto2~another test with ipv4 <URL> toto2
+website with different port number www.test.com:8080/test.jpg not port 80~website with different port number <URL> not port 80
+www.website.gov.us/login.html~<URL>
+test with ipv4 192.168.1.1/test.jpg.~test with ipv4 <URL>
+search at google.co.jp/maps.~search at <URL>
+test with ipv6 2001:0db8:0000:85a3:0000:0000:ac1f:8001/test.jpg~test with ipv6 <URL>
+dit is een domein met de root erin (de punt aan het einde) a.rootservers.net.~dit is een domein met de root erin (de punt aan het einde) <URL>
+Huh, hier is helemaal geen link?~Huh, hier is helemaal geen link?
+Ik ben Melvin en dit is mijn persoonlijke website: https://cool.domein.nl/index.php.~Ik ben Melvin en dit is mijn persoonlijke website: <URL>
+add https://facebook.jp.com.2. abc~add <URL>2. abc

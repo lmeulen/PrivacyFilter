@@ -1,0 +1,5 @@
+Je kan een antwoord sturen op user@gmail.com~Je kan een antwoord sturen op <EMAIL>
+Ik heb jullie gemaild met name@ns.nl.~Ik heb jullie gemaild met <EMAIL>.
+ik heb op hoi@name.tld een email gekregen van noreply@ns.nl.~ik heb op <EMAIL> een email gekregen van <EMAIL>.
+user@name.tld~<EMAIL>
+user+alias@name.tld~<EMAIL>
