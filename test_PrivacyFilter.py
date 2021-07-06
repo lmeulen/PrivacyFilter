@@ -12,7 +12,7 @@ def file_to_samples(file, directory="test_samples", delimiter="~"):
 
 def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
-    result = function(dirty, args, kwargs)
+    result = function(dirty, *args, **kwargs)
     self.assertEqual(
         result,
         clean,
