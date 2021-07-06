@@ -62,5 +62,10 @@ class TestRegex(PFTest):
             run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
 
 
+class TestKeywordProcessor(PFTest):
+    def test_names(self):
+        for sample in file_to_samples("names.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
 if __name__ == '__main__':
     unittest.main()

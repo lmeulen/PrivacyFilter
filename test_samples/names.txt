@@ -1,0 +1,10 @@
+hallo ik ben Melvin.~hallo ik ben <NAAM>.
+ik ben Ben en woon in Beverwijk~ik ben <NAAM> en woon in <NAAM>
+ik ben melvin.~ik ben <NAAM>.
+ik ben melvin en niet Joop.~ik ben melvin en niet <NAAM>.
+ik ben melvin~ik ben <NAAM>
+ik ben sjon~ik ben <NAAM>
+Hij heet Leo en werkt bij NS.~Hij heet <NAAM> en werkt bij NS.
+heet hij melvin?~heet hij <NAAM>?
+dat is niet Melvin!~dat is niet <NAAM>!
+dat is niet Melvin! Dat is Stijn.~dat is niet <NAAM>! Dat is <NAAM>.
