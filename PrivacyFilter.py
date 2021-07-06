@@ -3,15 +3,17 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-# import nl_core_news_lg
-#import nl_core_news_sm
+import nl_core_news_lg
+
+
+# import nl_core_news_sm
 
 
 class PrivacyFilter:
 
     def __init__(self):
-        self.keyword_processor_case_sensitive = KeywordProcessor(case_sensitive=True)
-        self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
         self.url_re = None
         self.initialised = False
         self.clean_accents = True
@@ -19,7 +21,10 @@ class PrivacyFilter:
         self.nlp = None
         self.use_nlp = False
 
-    def file_to_list(self, filename, minimum_length=0, drop_first=1):
+        ##### CONSTANTS #####
+        self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+
+    def file_to_list(self, filename, minimum_length=0, drop_first=True):
         with open(filename, encoding='latin') as f:
             lst = [line.rstrip() for line in f]
         lst = list(dict.fromkeys(lst))
@@ -34,34 +39,36 @@ class PrivacyFilter:
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-        print('Initializing')
-        for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
 
-        for name in self.file_to_list(os.path.join('datasets', 'places.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<PLAATS>' + c)
+        fields = {
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+            os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+            os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+            os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+            os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+            os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+        }
+
+        for field in fields:
+            # If there is a punctuation list, use it.
+            if fields[field]["punctuation"] is not None:
+                for name in self.file_to_list(field):
+                    for c in self._punctuation:
+                        self.keyword_processor.add_keyword(
+                            "{n}{c}".format(n=name, c=c),
+                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                        )
+            else:
+                for name in self.file_to_list(field):
+                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
-
-        for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<MEDICIJN>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<NATIONALITEIT>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'countries.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<LAND>')
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -128,12 +135,13 @@ class PrivacyFilter:
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            "([- /.]{,2}(\d{4}|\d{2}))?)",
-            "<DATUM>", text)
+            "([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)(?![^<]*>)",
+            "<DATUM> ", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)",
-            "<DATUM>", text)
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)"
+            "(?![^<]*>)",
+            "<DATUM> ", text)
         return text
 
     @staticmethod
@@ -151,7 +159,7 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_postal_codes(text):
-        return re.sub("[0-9]{4}[ ]?[A-Z]{2}(([ ,.:;])?)", "<POSTCODE>\\1", text)
+        return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
 
     @staticmethod
     def remove_accents(text):
@@ -175,9 +183,10 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text = self.keyword_processor_case_insensitive.replace_keywords(text)
-        text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text.strip()
+        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
+        text = self.keyword_processor.replace_keywords(text)
+        text = self.keyword_processor_names.replace_keywords(text)
+        return text[:-1]  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
@@ -219,7 +228,6 @@ class PrivacyFilter:
             text = self.remove_accents(text)
 
         text = self.filter_regular_expressions(text, set_numbers_zero)
-        text = " " + text + " "
         text = self.filter_keyword_processors(text)
         if nlp_filter:
             text = self.filter_nlp(text)
@@ -261,20 +269,20 @@ def main():
           "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
           "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan. Ik heet Melvin en woon in Beverwijk."
+          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
 
     print(insert_newlines(zin, 120))
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize(clean_accents=True, nlp_filter=False)
+    pfilter.initialize(clean_accents=True, nlp_filter=True)
     print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
     print('Number of forbidden words : ' + str(pfilter.nr_keywords))
 
     start = time.time()
     nr_sentences = 100
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=False)
+        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=True)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
