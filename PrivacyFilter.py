@@ -4,14 +4,16 @@ import os
 import unicodedata
 from flashtext import KeywordProcessor
 import nl_core_news_lg
-#import nl_core_news_sm
+
+
+# import nl_core_news_sm
 
 
 class PrivacyFilter:
 
     def __init__(self):
-        self.keyword_processor_case_sensitive = KeywordProcessor(case_sensitive=True)
-        self.keyword_processor_case_insensitive = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
         self.url_re = None
         self.initialised = False
         self.clean_accents = True
@@ -19,7 +21,10 @@ class PrivacyFilter:
         self.nlp = None
         self.use_nlp = False
 
-    def file_to_list(self, filename, minimum_length=0, drop_first=1):
+        ##### CONSTANTS #####
+        self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+
+    def file_to_list(self, filename, minimum_length=0, drop_first=True):
         with open(filename, encoding='latin') as f:
             lst = [line.rstrip() for line in f]
         lst = list(dict.fromkeys(lst))
@@ -34,33 +39,36 @@ class PrivacyFilter:
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-        for name in self.file_to_list(os.path.join('datasets', 'streets_Nederland.csv'), minimum_length=5):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<ADRES>' + c)
 
-        for name in self.file_to_list(os.path.join('datasets', 'places.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_insensitive.add_keyword(name + c, '<PLAATS>' + c)
+        fields = {
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+            os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+            os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+            os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+            os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+            os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+        }
+
+        for field in fields:
+            # If there is a punctuation list, use it.
+            if fields[field]["punctuation"] is not None:
+                for name in self.file_to_list(field):
+                    for c in self._punctuation:
+                        self.keyword_processor.add_keyword(
+                            "{n}{c}".format(n=name, c=c),
+                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                        )
+            else:
+                for name in self.file_to_list(field):
+                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            for c in ['.', ',', ' ', ':', ';', '?', '!']:
-                self.keyword_processor_case_sensitive.add_keyword(name + c, '<NAAM>' + c)
-
-        for name in self.file_to_list(os.path.join('datasets', 'diseases.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<AANDOENING>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'medicines.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<MEDICIJN>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'nationalities.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<NATIONALITEIT>')
-
-        for name in self.file_to_list(os.path.join('datasets', 'countries.csv')):
-            self.keyword_processor_case_insensitive.add_keyword(name, '<LAND>')
+            self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -175,9 +183,10 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text = self.keyword_processor_case_insensitive.replace_keywords(text)
-        text = self.keyword_processor_case_sensitive.replace_keywords(text)
-        return text
+        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
+        text = self.keyword_processor.replace_keywords(text)
+        text = self.keyword_processor_names.replace_keywords(text)
+        return text[:-1]  # Remove the trailing space
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
