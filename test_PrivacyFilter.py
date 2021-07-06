@@ -13,7 +13,7 @@ def file_to_samples(file, directory="test_samples", delimiter="~"):
 def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
     dirty = " {} ".format(dirty)
-    result = function(dirty, *args, **kwargs).strip()
+    result = function(dirty, *args, **kwargs)
     result = self.pfilter.cleanup_text(result)
     self.assertEqual(
         result,
@@ -21,7 +21,7 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
         msg="\r\n\"{input}\" failed.\r\n"
             "Filtered output was: \"{output}\".\r\n"
             "Filtered output should have been: \"{correct}\"".format(
-                input=dirty,
+                input=dirty[1:-1],  # Remove pre/append spaces.
                 correct=clean,
                 output=result
             )
@@ -65,6 +65,14 @@ class TestRegex(PFTest):
 class TestKeywordProcessor(PFTest):
     def test_names(self):
         for sample in file_to_samples("names.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_places(self):
+        for sample in file_to_samples("places.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_diseases(self):
+        for sample in file_to_samples("diseases.txt"):
             run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
 
 if __name__ == '__main__':
