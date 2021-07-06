@@ -1,0 +1,9 @@
+1234AB~<POSTCODE>
+ik woon op 1234AB~ik woon op <POSTCODE>
+ik woonde op 1234ab.~ik woonde op <POSTCODE>.
+1234 ab~<POSTCODE>
+12345ab~12345ab
+1234 AB~<POSTCODE>
+Ik woonde op 12345AB, nu woon ik op 5678CD~Ik woonde op 12345AB, nu woon ik op <POSTCODE>
+ik woonde op 1234 aB, nu woon ik op 5678Ab~ik woonde op <POSTCODE>, nu woon ik op <POSTCODE>
+1234ab is waar ik woon~<POSTCODE> is waar ik woon
