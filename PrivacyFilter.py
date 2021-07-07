@@ -25,13 +25,20 @@ class PrivacyFilter:
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
 
     def file_to_list(self, filename, minimum_length=0, drop_first=True):
-        with open(filename, encoding='latin') as f:
-            lst = [line.rstrip() for line in f]
-        lst = list(dict.fromkeys(lst))
-        self.nr_keywords += len(lst)
-        if minimum_length > 0:
-            lst = list(filter(lambda item: len(item) > minimum_length, lst))
-        return lst[drop_first:]
+        items_count = 0
+        items = []
+
+        with open(filename, "r", encoding="utf-8") as f:
+            if drop_first:
+                f.readline()
+
+            for line in f.readlines():
+                items_count += 1
+                line = line.rstrip()
+                items.append(line)
+
+        self.nr_keywords += items_count
+        return items
 
     def initialize(self, clean_accents=True, nlp_filter=True):
 
