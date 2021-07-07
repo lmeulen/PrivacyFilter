@@ -2,5 +2,5 @@ Ik ben 5~Ik ben <GETAL>
 het is 12 uur~het is <GETAL> uur
 12~<GETAL>
 twaalf~twaalf
-ik ben19~ik ben<GETAL>
-hallo19doei~hallo<GETAL>doei
+ik ben19~ik <GETAL>
+hallo19doei~<GETAL>
