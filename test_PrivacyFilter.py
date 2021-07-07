@@ -34,7 +34,7 @@ class PFTest(unittest.TestCase):
         self.pfilter = PrivacyFilter()
         self.pfilter.initialize(clean_accents=True, nlp_filter=False)
 
-        
+
 class TestAccents(PFTest):
     def test_clean_accents(self):
         for sample in file_to_samples("accents.txt"):
@@ -60,8 +60,8 @@ class TestRegex(PFTest):
 
     def test_time(self):
         for sample in file_to_samples("time.txt"):
-            run_test_function_with_data(self, self.pfilter.remove_times, sample)      
-            
+            run_test_function_with_data(self, self.pfilter.remove_times, sample)
+
     def test_numbers(self):
         for sample in file_to_samples("numbers.txt"):
             run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=False)
@@ -96,7 +96,7 @@ class TestKeywordProcessor(PFTest):
     def test_nationalities(self):
         for sample in file_to_samples("nationalities.txt"):
             run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
-           
+
 
 if __name__ == '__main__':
     unittest.main()
