@@ -1,3 +1,4 @@
+import re
 import unittest
 
 from PrivacyFilter import PrivacyFilter
@@ -12,9 +13,19 @@ def file_to_samples(file, directory="test_samples", delimiter="~"):
 
 def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
+
+    # Add spaces for easier regex
     dirty = " {} ".format(dirty)
+
+    # Run cleaning function
     result = function(dirty, *args, **kwargs)
     result = self.pfilter.cleanup_text(result)
+
+    # Replace any filtered output with <FILTERED> for easier runs
+    result = re.sub("\<[A-Z]+\>", "<FILTERED>", result)
+    clean = re.sub("\<[A-Z]+\>", "<FILTERED>", clean)
+
+    # Do the assertion
     self.assertEqual(
         result,
         clean,
@@ -67,8 +78,7 @@ class TestRegex(PFTest):
             run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=False)
 
     def test_numbers_set_zero_true(self):
-        for sample in file_to_samples("numbers.txt"):
-            sample[1] = sample[1].replace("<GETAL>", "0")  # Use dataset from set_zero=False and replace <getal> wtih 0.
+        for sample in file_to_samples("numbers_zeroes.txt"):
             run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
 
 
