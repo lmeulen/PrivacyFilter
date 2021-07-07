@@ -42,9 +42,9 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
 
 class PFTest(unittest.TestCase):
     @classmethod
-    def setUpClass(self):
-        self.pfilter = PrivacyFilter()
-        self.pfilter.initialize(clean_accents=True, nlp_filter=False)
+    def setUpClass(cls):
+        cls.pfilter = PrivacyFilter()
+        cls.pfilter.initialize(clean_accents=True, nlp_filter=False)
 
 
 class TestAccents(PFTest):
