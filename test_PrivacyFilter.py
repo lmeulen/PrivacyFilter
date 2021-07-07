@@ -15,7 +15,8 @@ def file_to_samples(file, directory="test_samples", delimiter="~"):
 def run_test_function_with_data(self, function, sample, *args, **kwargs):
     dirty, clean = sample
 
-    # Add spaces for easier regex
+    # Remove accents and add spaces for easier regex
+    dirty = self.pfilter.remove_accents(dirty)
     dirty = " {} ".format(dirty)
 
     # Run cleaning function

@@ -34,4 +34,4 @@ test with ipv6 2001:0db8:0000:85a3:0000:0000:ac1f:8001/test.jpg~test with ipv6 <
 dit is een domein met de root erin (de punt aan het einde) a.rootservers.net.~dit is een domein met de root erin (de punt aan het einde) <URL>
 Huh, hier is helemaal geen link?~Huh, hier is helemaal geen link?
 Ik ben Melvin en dit is mijn persoonlijke website: https://cool.domein.nl/index.php.~Ik ben Melvin en dit is mijn persoonlijke website: <URL>
-add https://facebook.jp.com.2. abc~add https://facebook.jp.com.2. abc
+add https://facebook.jp.com.2. abc~add <URL>2. abc
