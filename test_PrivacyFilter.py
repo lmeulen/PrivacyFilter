@@ -1,4 +1,5 @@
 import unittest
+import re
 
 from PrivacyFilter import PrivacyFilter
 
@@ -69,6 +70,7 @@ class TestRegex(PFTest):
     def test_numbers_set_zero_true(self):
         for sample in file_to_samples("numbers.txt"):
             sample[1] = sample[1].replace("<GETAL>", "0")  # Use dataset from set_zero=False and replace <getal> wtih 0.
+            sample[1] = re.sub(r'\d', '0', sample[0])
             run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
 
 
