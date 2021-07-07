@@ -29,7 +29,8 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
 
 
 class PFTest(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.pfilter = PrivacyFilter()
         self.pfilter.initialize(clean_accents=True, nlp_filter=False)
 
