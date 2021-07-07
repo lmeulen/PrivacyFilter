@@ -143,7 +143,7 @@ class PrivacyFilter:
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2})?)?)",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.]((\d{4}|\d{2}))?",
             "<DATUM>", text)
         return text
 
