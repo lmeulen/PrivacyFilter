@@ -35,7 +35,7 @@ class PrivacyFilter:
             for line in f.readlines():
                 items_count += 1
                 line = line.rstrip()
-                line = self.remove_accents(line)
+                line = self.remove_accents(line)  # TODO: move to dataupdater to
                 items.append(line)
 
         self.nr_keywords += items_count
