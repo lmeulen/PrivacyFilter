@@ -12,11 +12,16 @@ def file_to_samples(file, dir="test_samples", delimiter="~"):
 class PFTest(unittest.TestCase):
     def setUp(self):
         pass
-        self.pfilter = PrivacyFilter()
-        self.pfilter.initialize(clean_accents=True, nlp_filter=False)
+
+    @classmethod
+    def setUpClass(cls):
+        pass
+        cls.pfilter = PrivacyFilter()
+        cls.pfilter.initialize(clean_accents=True, nlp_filter=False)
 
 
 class TestRegex(PFTest):
+
     def test_url(self):
         for sample in file_to_samples("url.txt"):
             dirty, clean = sample
