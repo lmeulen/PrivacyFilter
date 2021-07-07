@@ -5,3 +5,4 @@ Het is 1:20am.~Het is <TIJD>.
 Het is 1:20 PM.~Het is <TIJD>.
 Het is 1:20 CM.~Het is <TIJD> CM.
 Het is 13:40 en we gaan zwemmen.~Het is <TIJD> en we gaan zwemmen.
+12:45 is hoe laat het is.~<TIJD> is hoe laat het is.
