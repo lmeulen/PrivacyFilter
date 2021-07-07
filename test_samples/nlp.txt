@@ -1,0 +1,3 @@
+Ik ben Melvin~Ik ben <NAAM>
+Ik woon in Beverijk~Ik woon in <LOCATIE>
+Ik heet Melvin en woon in Beverwijk~Ik heet <NAAM> en woon in <LOCATIE>

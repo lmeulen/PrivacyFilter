@@ -1,0 +1,5 @@
+Ik woon in Amsterdam~Ik woon in <PLAATS>
+gelukkig is Almere niet mijn woonplaats.~gelukkig is <ADRES> niet mijn woonplaats.
+Amersfoort is niet waar ik woon.~<PLAATS> is niet waar ik woon.
+Als je in de intericty vanaf Maastricht in slaap valt kom je uit in Den Helder.~Als je in de intericty vanaf <PLAATS> in slaap valt kom je uit in <ADRES>.
+bla bla bla stad zonder hoofdletters: Utrecht~bla bla bla stad zonder hoofdletters: <PLAATS>

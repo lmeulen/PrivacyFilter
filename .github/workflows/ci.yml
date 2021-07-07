@@ -31,6 +31,11 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test regex filters
+    - name: Test static filters
+      if: always()
       run: |
-        python test_PrivacyFilter.py
+        python -m unittest test_PrivacyFilter.py
+    - name: Test NLP filters
+      if: always()
+      run: |
+        python -m unittest test_PrivacyFilter_NLP.py

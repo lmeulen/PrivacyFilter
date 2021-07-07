@@ -162,7 +162,7 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_postal_codes(text):
-        return re.sub("[0-9]{4}[ ]?[A-Z]{2}([ ,.:;])", "<POSTCODE>\\1", text)
+        return re.sub(r"\b([0-9]{4}\s?[a-zA-Z]{2})", "<POSTCODE>", text)
 
     @staticmethod
     def remove_accents(text):

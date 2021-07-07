@@ -1,56 +1,102 @@
 import unittest
+
 from PrivacyFilter import PrivacyFilter
 
 
-def file_to_samples(file, dir="test_samples", delimiter="~"):
-    with open("{dir}/{file}".format(dir=dir,file=file)) as f:
+def file_to_samples(file, directory="test_samples", delimiter="~"):
+    with open("{dir}/{file}".format(dir=directory, file=file)) as f:
         for line in f.readlines():
             line = line.rstrip()
-            yield tuple(line.split(delimiter))
+            yield line.split(delimiter)
+
+
+def run_test_function_with_data(self, function, sample, *args, **kwargs):
+    dirty, clean = sample
+    dirty = " {} ".format(dirty)
+    result = function(dirty, *args, **kwargs)
+    result = self.pfilter.cleanup_text(result)
+    self.assertEqual(
+        result,
+        clean,
+        msg="\r\n\"{input}\" failed.\r\n"
+            "Filtered output was: \"{output}\".\r\n"
+            "Filtered output should have been: \"{correct}\"".format(
+                input=dirty[1:-1],  # Remove pre/append spaces.
+                correct=clean,
+                output=result
+            )
+    )
 
 
 class PFTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
     @classmethod
-    def setUpClass(cls):
-        pass
-        cls.pfilter = PrivacyFilter()
-        cls.pfilter.initialize(clean_accents=True, nlp_filter=False)
+    def setUpClass(self):
+        self.pfilter = PrivacyFilter()
+        self.pfilter.initialize(clean_accents=True, nlp_filter=False)
+
+
+class TestAccents(PFTest):
+    def test_clean_accents(self):
+        for sample in file_to_samples("accents.txt"):
+            run_test_function_with_data(self, self.pfilter.remove_accents, sample)
 
 
 class TestRegex(PFTest):
-
     def test_url(self):
         for sample in file_to_samples("url.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_url(dirty))
+            run_test_function_with_data(self, self.pfilter.remove_url, sample)
 
     def test_email(self):
         for sample in file_to_samples("email.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_email(dirty))
+            run_test_function_with_data(self, self.pfilter.remove_email, sample)
 
     def test_date(self):
         for sample in file_to_samples("date.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_dates(dirty))
-
-    def test_time(self):
-        for sample in file_to_samples("time.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_times(dirty))
+            run_test_function_with_data(self, self.pfilter.remove_dates, sample)
 
     def test_postal_codes(self):
         for sample in file_to_samples("postal_codes.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_postal_codes(dirty))
+            run_test_function_with_data(self, self.pfilter.remove_postal_codes, sample)
+
+    def test_time(self):
+        for sample in file_to_samples("time.txt"):
+            run_test_function_with_data(self, self.pfilter.remove_times, sample)
 
     def test_numbers(self):
         for sample in file_to_samples("numbers.txt"):
-            dirty, clean = sample
-            self.assertEqual(clean, self.pfilter.remove_numbers(dirty))
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=False)
+
+    def test_numbers_set_zero_true(self):
+        for sample in file_to_samples("numbers.txt"):
+            sample[1] = sample[1].replace("<GETAL>", "0")  # Use dataset from set_zero=False and replace <getal> wtih 0.
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
+
+
+class TestKeywordProcessor(PFTest):
+    def test_names(self):
+        for sample in file_to_samples("names.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_places(self):
+        for sample in file_to_samples("places.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_streets(self):
+        for sample in file_to_samples("streets.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_diseases(self):
+        for sample in file_to_samples("diseases.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_countries(self):
+        for sample in file_to_samples("countries.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
+    def test_nationalities(self):
+        for sample in file_to_samples("nationalities.txt"):
+            run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
+
 
 if __name__ == '__main__':
     unittest.main()
