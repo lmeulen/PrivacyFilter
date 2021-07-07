@@ -37,6 +37,11 @@ class TestRegex(PFTest):
             dirty, clean = sample
             self.assertEqual(clean, self.pfilter.remove_dates(dirty))
 
+    def test_time(self):
+        for sample in file_to_samples("time.txt"):
+            dirty, clean = sample
+            self.assertEqual(clean, self.pfilter.remove_times(dirty))
+
     def test_postal_codes(self):
         for sample in file_to_samples("postal_codes.txt"):
             dirty, clean = sample

@@ -130,6 +130,10 @@ class PrivacyFilter:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
 
     @staticmethod
+    def remove_times(text):
+        return re.sub('(\d{1,2})[.:](\d{1,2})?([ ]?(am|pm|AM|PM))?', '<TIJD>', text)
+
+    @staticmethod
     def remove_dates(text):
         text = re.sub("\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
 
@@ -190,6 +194,7 @@ class PrivacyFilter:
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
         text = self.remove_dates(text)
+        text = self.remove_times(text)
         text = self.remove_email(text)
         text = self.remove_postal_codes(text)
         text = self.remove_numbers(text, set_numbers_zero)

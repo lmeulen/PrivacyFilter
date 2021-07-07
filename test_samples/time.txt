@@ -1,0 +1,7 @@
+Het is 11:20~Het is <TIJD>
+Het is 11:20.~Het is <TIJD>.
+Het is 1:20.~Het is <TIJD>.
+Het is 1:20am.~Het is <TIJD>.
+Het is 1:20 PM.~Het is <TIJD>.
+Het is 1:20 CM.~Het is <TIJD> CM.
+Het is 13:40 en we gaan zwemmen.~Het is <TIJD> en we gaan zwemmen.
