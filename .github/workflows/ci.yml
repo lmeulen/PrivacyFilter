@@ -34,6 +34,6 @@ jobs:
     - name: Test static filters
       run: |
         python -m unittest test_PrivacyFilter.py
-    -name: Test NLP filters
+    - name: Test NLP filters
       run: |
         python -m unittest test_PrivacyFilter_NLP.py
