@@ -9,6 +9,8 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+# TODO: cleanup data updater and apply accent removal on data (remove the cleaning at runtime from PrivacyFilter.py)
+
 if __name__ == "__main__":
 
     #
