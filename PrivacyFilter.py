@@ -143,13 +143,13 @@ class PrivacyFilter:
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.]((\d{4}|\d{2}))?",
             "<DATUM>", text)
         return text
 
     @staticmethod
     def remove_email(text):
-        return re.sub("(([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))(?![^<]*>)",
+        return re.sub("(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))(?![^<]*>)",
                       "<EMAIL>",
                       text)
 

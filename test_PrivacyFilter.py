@@ -1,11 +1,12 @@
 import re
 import unittest
+import re
 
 from PrivacyFilter import PrivacyFilter
 
 
 def file_to_samples(file, directory="test_samples", delimiter="~"):
-    with open("{dir}/{file}".format(dir=directory, file=file)) as f:
+    with open("{dir}/{file}".format(dir=directory, file=file), encoding="utf-8") as f:
         for line in f.readlines():
             line = line.rstrip()
             yield line.split(delimiter)
