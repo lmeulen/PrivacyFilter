@@ -1,0 +1,3 @@
+Ik ben Nederlands~Ik ben <NATIONALITEIT>
+Ik ben Nederlands, dus niet Duits~Ik ben <NATIONALITEIT>, dus niet <NATIONALITEIT>
+chinees spreek ik niet~<NATIONALITEIT> spreek ik niet

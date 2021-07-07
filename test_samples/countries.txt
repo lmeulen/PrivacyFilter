@@ -1,0 +1,6 @@
+Ik heb geen idee waar Antigua en Barbuda liggen~Ik heb geen idee waar <LAND> liggen
+Nederland is waar ik woon~<LAND> is waar ik woon
+ik woon in Nederland~ik woon in <LAND>
+belgië~<LAND>
+beLgie~<LAND>
+belgïe~<LAND>
