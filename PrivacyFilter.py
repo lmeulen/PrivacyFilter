@@ -105,12 +105,11 @@ class PrivacyFilter:
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'^((?:[a-z0-9.+-]*):?//)?'                                 # scheme is validated separately
+            r'((?:[a-z0-9.+-]*):?//)?'                                  # scheme is validated separately
             r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
             r'(?::\d{2,5})?'                                            # port
-            r'(?:[/?#][^\s]*)?'                                         # resource path
-            r'\Z',
+            r'(?:[/?#][^\s]*)?',                                        # resource path
             re.IGNORECASE
         )
 
@@ -154,11 +153,8 @@ class PrivacyFilter:
                       text)
 
     def remove_url(self, text):
-        filtered = []
-        for chunk in text.split(" "):
-            filtered.append(re.sub(self.url_re, "<URL>", chunk))
-
-        return " ".join(filtered)
+        text = re.sub(self.url_re, "<URL>", text)
+        return text
 
     @staticmethod
     def remove_postal_codes(text):
