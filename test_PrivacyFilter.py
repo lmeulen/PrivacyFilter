@@ -100,5 +100,11 @@ class TestKeywordProcessor(PFTest):
             run_test_function_with_data(self, self.pfilter.filter_keyword_processors, sample)
 
 
+class TestFilter(PFTest):
+    def test_filter(self):
+        for sample in file_to_samples("filter.txt"):
+            run_test_function_with_data(self, self.pfilter.filter, sample, set_numbers_zero=False, nlp_filter=False)
+
+
 if __name__ == '__main__':
     unittest.main()

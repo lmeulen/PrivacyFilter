@@ -1,0 +1,5 @@
+Ik ben Piet~Ik ben <NAAM>
+Ik woon in Asten~Ik woon in <PLAATS>
+Ik woon in asten~Ik woon in <PLAATS>
+Ik heet Melvin en woon in Asten~Ik heet <NAAM> en woon in <PLAATS>
+welke stad is dit?~welke stad is dit?
