@@ -17,6 +17,7 @@ Regular expression based replacements:
 - URL
 - Email addresses
 - Dates
+- Times
 - Postal codes (Dutch format)
 - Numbers
 

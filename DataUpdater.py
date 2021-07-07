@@ -32,6 +32,7 @@ if __name__ == "__main__":
                  'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
         lst.append(pd.read_csv('datasets\\RAW_streets\\streets_' + name + '.csv'))
     streetnames = pd.concat(lst, axis=0, ignore_index=True).drop_duplicates()
+    streetnames = streetnames[streetnames.name.str.len() > 5]
     streetnames.to_csv('datasets\\streets_Nederland.csv', index=False)
 
     #
