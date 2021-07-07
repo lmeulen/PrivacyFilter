@@ -135,13 +135,12 @@ class PrivacyFilter:
 
         text = re.sub(
             "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            "([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)(?![^<]*>)",
-            "<DATUM> ", text)
+            "([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)(?P<n>\D)"
-            "(?![^<]*>)",
-            "<DATUM> ", text)
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec)([- /.]{,2}(\d{4}|\d{2}))?)",
+            "<DATUM>", text)
         return text
 
     @staticmethod
