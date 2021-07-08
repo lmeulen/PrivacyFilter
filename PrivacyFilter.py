@@ -3,10 +3,7 @@ import re
 import os
 import unicodedata
 from flashtext import KeywordProcessor
-import nl_core_news_lg
-
-
-# import nl_core_news_sm
+import nl_core_news_sm
 
 
 class PrivacyFilter:
@@ -89,7 +86,6 @@ class PrivacyFilter:
                   r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,'\
                   r'5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?'
 
-
         # Host patterns
         hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
         # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
@@ -115,8 +111,7 @@ class PrivacyFilter:
         )
 
         if nlp_filter:
-            self.nlp = nl_core_news_lg.load()
-            # self.nlp = nl_core_news_sm.load()
+            self.nlp = nl_core_news_sm.load()
             self.use_nlp = True
 
         self.clean_accents = clean_accents
@@ -149,7 +144,8 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_email(text):
-        return re.sub("(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))(?![^<]*>)",
+        return re.sub("(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))"
+                      "(?![^<]*>)",
                       "<EMAIL>",
                       text)
 
@@ -174,6 +170,7 @@ class PrivacyFilter:
         result = ""
         prev = ""
         for X in doc:
+            print(X.text + " -->" + X.ent_type_)
             if not X.ent_type_:
                 result += X.text
             else:
