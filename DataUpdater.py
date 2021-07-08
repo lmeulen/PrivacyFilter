@@ -43,6 +43,7 @@ if __name__ == "__main__":
     places = np.append(
         np.append(np.append(total.Woonplaatsen.values, total.Naam_2.values), total.Naam_4.values), total.Naam_6.values)
     places = pd.DataFrame(places, columns=['plaatsnaam']).drop_duplicates()
+    places = places[places.plaatsnaam.str.len() > 3]
     places.to_csv("datasets\\places.csv", index=False)
 
     #

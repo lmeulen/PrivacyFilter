@@ -32,8 +32,8 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
         result,
         clean,
         msg="\r\n\"{input}\" failed.\r\n"
-            "Filtered output was: \"{output}\".\r\n"
-            "Filtered output should have been: \"{correct}\"".format(
+            "Filtered output was              : \"{output}\".\r\n"
+            "Filtered output should have been : \"{correct}\"".format(
                 input=dirty[1:-1],  # Remove pre/append spaces.
                 correct=clean,
                 output=result
