@@ -1,20 +1,7 @@
 /*.ipynb
 /datasets/RAW*
-/flashtext
-/osmnx
 /.ipynb_checkpoints
 /cache
-/input_data
-
-
-
-
-
-
-
-
-
-
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,windows,linux,pycharm+all,git,powershell
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,windows,linux,pycharm+all,git,powershell

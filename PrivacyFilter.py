@@ -174,7 +174,6 @@ class PrivacyFilter:
         result = ""
         prev = ""
         for X in doc:
-            print(X.text + " -->" + X.ent_type_)
             if not X.ent_type_:
                 result += X.text
             else:
