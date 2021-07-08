@@ -36,7 +36,7 @@ jobs:
       run: |
         python -m unittest test_PrivacyFilter.py
 # Don't run the NLP unittest as the NLP isn't developed enough.
-#    - name: Test NLP filters
-#      if: always()
-#      run: |
-#        python -m unittest test_PrivacyFilter_NLP.py
+    - name: Test NLP filters
+      if: always()
+      run: |
+        python -m unittest test_PrivacyFilter_NLP.py
