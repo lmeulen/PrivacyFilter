@@ -21,7 +21,7 @@ class PrivacyFilter:
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
 
-    def file_to_list(self, filename, minimum_length=0, drop_first=True):
+    def file_to_list(self, filename, drop_first=True):
         items_count = 0
         items = []
 
