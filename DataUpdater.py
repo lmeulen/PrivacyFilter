@@ -38,8 +38,9 @@ def update_streetnames(download=True, min_length=6):
                  'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
         lst.append(pd.read_csv(join('datasets', 'RAW_streets', 'streets_' + name + '.csv')))
     streetnames = pd.concat(lst, axis=0, ignore_index=True).drop_duplicates()
-    streetnames = streetnames[streetnames.name.str.len() >= min_length]
-    streetnames.name = streetnames.apply(lambda x: remove_accents(x.name), axis=1)
+    streetnames.columns = ['straatnaam']
+    streetnames = streetnames[streetnames.straatnaam.str.len() >= min_length]
+    streetnames.straatnaam = streetnames.apply(lambda x: remove_accents(x.straatnaam), axis=1)
     streetnames.to_csv(join('datasets', 'streets_Nederland.csv'), index=False)
 
 
@@ -184,13 +185,13 @@ def update_countries():
 
 def update_datasets():
     update_streetnames(download=False, min_length=6)
-    update_places(min_length=4)
-    update_firstnames()
-    update_lastnames()
-    update_diseases()
-    update_medicines()
-    update_nationalities()
-    update_countries()
+    # update_places(min_length=4)
+    # update_firstnames()
+    # update_lastnames()
+    # update_diseases()
+    # update_medicines()
+    # update_nationalities()
+    # update_countries()
 
 
 if __name__ == "__main__":
