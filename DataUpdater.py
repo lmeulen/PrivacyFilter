@@ -13,7 +13,7 @@ from os.path import join
 
 
 def remove_accents(text):
-    text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
+    text = unicodedata.normalize('NFD', str(text)).encode('ascii', 'ignore')
     return str(text.decode("utf-8"))
 
 
@@ -183,7 +183,7 @@ def update_countries():
 
 
 def update_datasets():
-    update_streetnames(download=True, min_length=6)
+    update_streetnames(download=False, min_length=6)
     update_places(min_length=4)
     update_firstnames()
     update_lastnames()
