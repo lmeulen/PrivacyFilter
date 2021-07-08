@@ -1,14 +1,15 @@
-import requests
-import urllib
-import zipfile
 import re
+import urllib
+import xml.etree.ElementTree as ElementTree
+import zipfile
 import cbsodata
+import numpy as np
 import osmnx as ox
 import pandas as pd
-import geopandas as gpd
-import numpy as np
-import xml.etree.ElementTree as ElementTree
+import requests
 from bs4 import BeautifulSoup
+
+# TODO: cleanup data updater and apply accent removal on data (remove the cleaning at runtime from PrivacyFilter.py)
 
 if __name__ == "__main__":
 

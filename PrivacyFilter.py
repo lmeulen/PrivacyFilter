@@ -22,13 +22,21 @@ class PrivacyFilter:
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
 
     def file_to_list(self, filename, minimum_length=0, drop_first=True):
-        with open(filename, encoding='latin') as f:
-            lst = [line.rstrip() for line in f]
-        lst = list(dict.fromkeys(lst))
-        self.nr_keywords += len(lst)
-        if minimum_length > 0:
-            lst = list(filter(lambda item: len(item) > minimum_length, lst))
-        return lst[drop_first:]
+        items_count = 0
+        items = []
+
+        with open(filename, "r", encoding="utf-8") as f:
+            if drop_first:
+                f.readline()
+
+            for line in f.readlines():
+                items_count += 1
+                line = line.rstrip()
+                line = self.remove_accents(line)  # TODO: move to dataupdater to
+                items.append(line)
+
+        self.nr_keywords += items_count
+        return items
 
     def initialize(self, clean_accents=True, nlp_filter=True):
 
@@ -101,12 +109,11 @@ class PrivacyFilter:
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'^((?:[a-z0-9.+-]*):?//)?'                                 # scheme is validated separately
+            r'((?:[a-z0-9.+-]*):?//)?'                                  # scheme is validated separately
             r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
             r'(?::\d{2,5})?'                                            # port
-            r'(?:[/?#][^\s]*)?'                                         # resource path
-            r'\Z',
+            r'(?:[/?#][^\s]*)?',                                        # resource path
             re.IGNORECASE
         )
 
@@ -150,11 +157,8 @@ class PrivacyFilter:
                       text)
 
     def remove_url(self, text):
-        filtered = []
-        for chunk in text.split(" "):
-            filtered.append(re.sub(self.url_re, "<URL>", chunk))
-
-        return " ".join(filtered)
+        text = re.sub(self.url_re, "<URL>", text)
+        return text
 
     @staticmethod
     def remove_postal_codes(text):
