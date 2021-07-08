@@ -53,7 +53,7 @@ def update_places(min_length=4):
     places = pd.DataFrame(places, columns=['plaatsnaam']).drop_duplicates()
     places = places[places.plaatsnaam.str.len() >= min_length]
     places.plaatsnaam = places.apply(lambda x: remove_accents(x.plaatsnaam), axis=1)
-    places.to_csv(join("datasets','places.csv"), index=False)
+    places.to_csv(join("datasets", "places.csv"), index=False)
 
 
 def update_firstnames():
@@ -61,8 +61,8 @@ def update_firstnames():
     # Download first names
     #
     url = "http://www.naamkunde.net/?page_id=293&vt_download_xml=true"
-    urllib.request.urlretrieve(url, join("datasets', 'RAW_names', 'firstnames.xml"))
-    xtree = ElementTree.parse(join("datasets', 'RAW_names', 'firstnames.xml"))
+    urllib.request.urlretrieve(url, join("datasets", "RAW_names", "firstnames.xml"))
+    xtree = ElementTree.parse(join("datasets", "RAW_names", "firstnames.xml"))
     xroot = xtree.getroot()
     firstnames = []
     for node in xroot:
@@ -71,7 +71,7 @@ def update_firstnames():
             firstnames.append({"voornaam": voornaam.text})
     firstnames = pd.DataFrame(firstnames).drop_duplicates()
     firstnames.voornaam = firstnames.apply(lambda x: remove_accents(x.voornaam), axis=1)
-    firstnames.to_csv(join("datasets', 'firstnames.csv"), index=False)
+    firstnames.to_csv(join("datasets", "firstnames.csv"), index=False)
 
 
 def update_lastnames():
@@ -79,8 +79,8 @@ def update_lastnames():
     # Download last names
     #
     url = "http://www.naamkunde.net/wp-content/uploads/oudedocumenten/fn10k_versie1.zip"
-    urllib.request.urlretrieve(url, join("datasets', 'RAW_names', 'lastnames.zip"))
-    zf = zipfile.ZipFile(join("datasets', 'RAW_names', 'lastnames.zip"), 'r')
+    urllib.request.urlretrieve(url, join("datasets", "RAW_names", "lastnames.zip"))
+    zf = zipfile.ZipFile(join("datasets", "RAW_names", "lastnames.zip"), 'r')
     f = zf.open("fn_10kw.xml")
     xtree = ElementTree.parse(f)
     xroot = xtree.getroot()
@@ -95,7 +95,7 @@ def update_lastnames():
                 lastnames.append({"achternaam": lastname.text})
     lastnames = pd.DataFrame(lastnames).drop_duplicates()
     lastnames.achternaam = lastnames.apply(lambda x: remove_accents(x.achternaam), axis=1)
-    lastnames.to_csv(join("datasets', 'lastnames.csv"), index=False)
+    lastnames.to_csv(join("datasets", "lastnames.csv"), index=False)
 
 
 def update_diseases():
@@ -111,7 +111,7 @@ def update_diseases():
         diseases.append(tag.text)
     diseases = pd.DataFrame(diseases, columns=['aandoening'])
     diseases.aandoening = diseases.apply(lambda x: remove_accents(x.aandoening), axis=1)
-    diseases.to_csv(join("datasets', 'diseases.csv"), index=False)
+    diseases.to_csv(join("datasets", "diseases.csv"), index=False)
 
 
 def update_medicines():
@@ -142,7 +142,7 @@ def update_medicines():
     medicines['medicijn'] = new[0].str.title()
     medicines = medicines[['medicijn']].sort_values('medicijn').drop_duplicates()
     medicines.medicijn = medicines.apply(lambda x: remove_accents(x.medicijn), axis=1)
-    medicines.to_csv(join("datasets', 'medicines.csv"), index=False)
+    medicines.to_csv(join("datasets", "medicines.csv"), index=False)
 
 
 def update_nationalities():
@@ -152,7 +152,7 @@ def update_nationalities():
     total = pd.DataFrame(cbsodata.get_data('03743'))
     nationalities = pd.DataFrame(total.Nationaliteiten.unique()[1:-1], columns=['nationaliteit']).drop_duplicates()
     nationalities.nationaliteit = nationalities.apply(lambda x: remove_accents(x.nationaliteit), axis=1)
-    nationalities.to_csv(join("datasets', 'nationalities.csv"), index=False)
+    nationalities.to_csv(join("datasets", "nationalities.csv"), index=False)
 
 
 def update_countries():
@@ -179,7 +179,7 @@ def update_countries():
                 lst.append(cells[3].text.strip().split(":")[1].split('/')[0].strip())
     countries = pd.DataFrame(lst, columns=['land']).drop_duplicates()
     countries.land = countries.apply(lambda x: remove_accents(x.land), axis=1)
-    countries.to_csv(join("datasets', 'countries.csv"), index=False)
+    countries.to_csv(join("datasets", "countries.csv"), index=False)
 
 
 def update_datasets():
