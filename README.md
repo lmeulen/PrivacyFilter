@@ -13,30 +13,30 @@ implemented (FreeTextAPI).
 There are two type of replacements; first regular expression based, then the forbidden word lists are removed using the
 FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
 
-Regular expression based replacements:
-- URL
-- Email addresses
-- Dates
-- Times
-- Postal codes (Dutch format)
-- Numbers
+- Regular expression based replacements:
+  - URL
+  - Email addresses
+  - Dates
+  - Times
+  - Postal codes (Dutch format)
+  - Numbers
 
-Keywords to be replaced ('forbidden words'):
-- Street names
-- Places (cities, regions, etc)
-- First names
-- Last names
-- Medicines
-- Diseases
-- Nationalities
-- Countries
+- Keywords to be replaced ('forbidden words'):
+  - Street names
+  - Places (cities, regions, etc)
+  - First names
+  - Last names
+  - Medicines
+  - Diseases
+  - Nationalities
+  - Countries
 
-Named Entity REcognition with Spacy (optional)
+- Named Entity Recognition with Spacy (optional)
 
 ## Dependencies
 For using the PrivacyFilter class:
 - FlashText
-- Spacy, including nl_core_news_lg 
+- Spacy, including nl_core_news_ls
 
 Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
 to use the NLP filter. This is not needed when installing dependencies from the requirements.txt with pip.
@@ -52,6 +52,8 @@ And for downloading and creating new datafiles
 - Numpy
 - BeautifulSoup
 - cbsodata
+
+The full dependency list is available in the requirements.txt
 
 ## Example usage
 ~~~~
@@ -89,7 +91,7 @@ The initialisation of the PrivacyFilter is expensive, it takes almost 3 seconds 
 (Intel i5-1035G7, 8GB, SSD).
 
 Parsing a sentence and replacing privacy related information is fast, It takes approx 0.5 ms 
-without the NLP step and 20 ms with the NLP step. With NLP, initialisation time increases to 11 seconds.
+without the NLP step and 5 ms with the NLP step. With NLP, initialisation time increases to 11 seconds.
 
 ## API
 
@@ -102,5 +104,16 @@ python3 PrivacyFilterAPI.py
 
 After starting the API, a service is created at https://localhost:8000. The documentation for this 
 service is available at https://localhost:8000/docs.
+
+## Running on Heroku
+
+It is possible to run the  filter on Heroku, al required specification files are in place. Do note 
+that the free version of Heroku has an application limit of 500MB. To be able to run the filter
+on Heroku for free some meausres must be taken to reduce the application size. This can be done
+be reducing the file sizes in datasets and/or not loading the NLP part.  On a paid server there is sufficient capacity to run the complete server.
+
+See 
+[Create a Privacy Filter Web Service with FastAPI and Heroku](https://medium.com/4755ef1ccb25)
+for more information.
 
 Enjoy!
