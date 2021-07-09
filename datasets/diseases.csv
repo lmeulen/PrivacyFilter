@@ -1,4 +1,8 @@
 aandoening
+ACE-remmer
+ADHD
+AIDS
+ARDS
 Aambei
 Aangezichtspijn
 Aanpassingsstoornis
@@ -6,7 +10,6 @@ Aanstelleritis
 Aardbeientong
 Aardbeihemangioom
 Abces
-ACE-remmer
 Achalasie
 Achillespeesbreuk
 Achillespeesontsteking
@@ -20,7 +23,6 @@ Acute stress-stoornis
 Addison (ziekte van)
 Adenocarcinoom
 Adenoom
-ADHD
 Adrenogenitaal syndroom
 Aerofagie
 Afasie
@@ -30,7 +32,6 @@ Agenesie
 Ageusie
 Agnosie
 Agorafobie
-AIDS
 Ailurofobie
 Akinesie
 Alagille-syndroom
@@ -80,7 +81,6 @@ Apotemnofobie
 Apraxie
 Arachibutyrofobie
 Arachnofobie
-ARDS
 Aritmomanie
 Arterioveneuze malformatie
 Artritis
@@ -107,8 +107,8 @@ Atypische mycobacterien
 Autisme
 Autismespectrum
 Autistische stoornis
-Autoglossofobie
 Auto-immuunziekte
+Autoglossofobie
 Automutilatie
 Autoseksualiteit
 Avolitie
@@ -137,10 +137,9 @@ Bewusteloosheid
 Bifobie
 Bijholteontsteking
 Bijziendheid
-Bindvliesontsteking
-Bipolaire stoornis
 Bilharzia
 Bindvliesontsteking
+Bipolaire stoornis
 Blaar
 Blaasontsteking
 Blackhead
@@ -167,9 +166,9 @@ Boviene spongiforme encefalopathie
 Boviene virus diarree
 Braken
 Brandwond
+Brandwond (derdegraads)
 Brandwond (eerstegraads)
 Brandwond (tweedegraads)
-Brandwond (derdegraads)
 Brandwond (vierdegraads)
 Breslow-dikte
 Bronchitis
@@ -184,6 +183,7 @@ Builenpest
 Burn-out
 Byssinose
 CANS
+COPD
 Cachexie
 Caissonziekte
 Campylobacter
@@ -238,7 +238,6 @@ Congenitale sferocytose
 Constitutioneel eczeem
 Contactdermatitis
 Conversiestoornis
-COPD
 Coprofagie
 Coprofobie
 Coprolagnie
@@ -246,6 +245,9 @@ Coprolalie
 Copropraxie
 Cornea-erosie
 Coronavirus
+Corona
+Covid
+Covid-19
 Cortexnecrose
 Cotard-syndroom
 Coulrofobie
@@ -279,13 +281,13 @@ Dermatomyositis
 Desintegratiestoornis van de kinderleeftijd
 Desorientatie
 Dhatsyndroom
+DiGeorge-syndroom
 Diabetes mellitus
 Diabetische retinopathie
 Diarree
-Dieptevrees
 Diep-veneuze trombose
+Dieptevrees
 Difterie
-DiGeorge-syndroom
 Dissociatie
 Dissociatieve amnesie
 Dissociatieve fugue
@@ -317,10 +319,10 @@ Dyspepsie
 Dyspraxie
 Dysthyme stoornis
 Dystonie
+ECHO-virus
 Ebola
 Echinokokkose
 Echolalie
-ECHO-virus
 Economy class-syndroom
 Eczeem
 Edwards-syndroom
@@ -400,6 +402,7 @@ Frigide
 Frotteurisme
 Frozen shoulder
 Fruhsommer Meningo Encephalitis
+GSS
 Galsteen
 Galsteenkoliek
 Gamofobie
@@ -438,11 +441,11 @@ Granuloma annulare
 Granuloom
 Griep
 Grijze staar
-GSS
 Guillain-Barre-syndroom
 Gymnofobie
 Gynecomastie
 Gynefobie
+HELLP-syndroom
 Haarfollikelmijt
 Haarnestcyste
 Hallucinatie
@@ -458,7 +461,6 @@ Hartritmestoornis
 Hartstilstand
 Harttamponade
 Hazenlip
-HELLP-syndroom
 Hematofobie
 Hematurie
 Hemochromatose
@@ -530,8 +532,8 @@ Hypothyreoidie
 Hypovolemie
 Hypoxie
 Hysterie
-Identificatiesyndroom
 IJshoofdpijn
+Identificatiesyndroom
 Impotentie
 Incontinentia pigmenti
 Incontinentie
@@ -547,6 +549,7 @@ Jaloersheidswaan
 Jeruzalem-syndroom
 Jeuk
 Jicht
+KISS-syndroom
 Kaalheid
 Kachelbenen
 Kahler (ziekte van)
@@ -564,7 +567,6 @@ Keratomalacie
 Kiespijn
 Kinderziekte
 Kinkhoest
-KISS-syndroom
 Klapvoet
 Kleptomanie
 Kleurenblindheid
@@ -605,8 +607,8 @@ Laurence-Moon-Bardet-Biedl-syndroom
 Leerstoornis
 Legionellagriep
 Lepra
-Lesch-Nyhan-syndroom
 Lesbofobie
+Lesch-Nyhan-syndroom
 Leukemie
 Leukocytose
 Leukoplakie
@@ -751,6 +753,7 @@ Ouderverstotingssyndroom
 Oudziendheid
 Overspannenheid
 Ozaena
+PDD-NOS
 Palilalie
 Pancreatitis
 Paniekaanval
@@ -772,7 +775,6 @@ Passieve immuniteit
 Pathogeen
 Pathologisch gokken
 Pathologisch liegen
-PDD-NOS
 Pedofilie
 Peesontsteking
 Peesschedeontsteking
@@ -847,9 +849,9 @@ Pulpanecrose
 Pus
 Pylorushypertrofie
 Pyromanie
-Ziekte van Paget
 Q-koorts
 Querulantenwaan
+RIND
 Rabdomyoom
 Rachitis
 Raynaud-fenomeen
@@ -865,7 +867,6 @@ Reumatoide artritis
 Rhinitis
 Riftdalkoorts
 Rigiditeit
-RIND
 Ringworm
 Risus sardonicus
 Rode hond
@@ -874,11 +875,11 @@ Rosacea
 Rugpijn
 Ruminatiestoornis
 Russofobie
+SARS
 Sadisme
 Saliromanie
 Sarcoidose
 Sarcoom
-SARS
 Satyriasis
 Schaafwond
 Schaamluis
@@ -968,7 +969,6 @@ Stuitligging
 Subjectief dubbelgangersyndroom
 Superinfectie
 Syfilis
-syncope
 Syndactylie
 Syndroom
 Syndroom van Alagille
@@ -977,7 +977,6 @@ Syndroom van Apert
 Syndroom van Asherman
 Syndroom van Asperger
 Syndroom van Bloom
-Syndroom van DiGeorge
 Syndroom van Capgras
 Syndroom van Carpenter
 Syndroom van Charles Bonnet
@@ -985,6 +984,7 @@ Syndroom van Churg-Strauss
 Syndroom van Cotard
 Syndroom van Crouzon
 Syndroom van Cushing
+Syndroom van DiGeorge
 Syndroom van Down
 Syndroom van Edwards
 Syndroom van Ehlers-Danlos
@@ -994,7 +994,6 @@ Syndroom van Gerstmann
 Syndroom van Gilbert
 Syndroom van Gilles de la Tourette
 Syndroom van Guillain-Barre
-Syndroom van inadequate secretie van antidiuretisch hormoon
 Syndroom van Kallmann
 Syndroom van Klinefelter
 Syndroom van Kluver-Bucy
@@ -1012,9 +1011,11 @@ Syndroom van Turner
 Syndroom van Usher
 Syndroom van Waardenburg
 Syndroom van Wernicke
+Syndroom van inadequate secretie van antidiuretisch hormoon
 Synesthesie
 Syringomyelie
 Systemische lupus erythematodes
+TIA
 Taaislijmziekte
 Tachycardie
 Taijin kyofusho
@@ -1032,7 +1033,6 @@ Thalassemie
 Thanatofobie
 Theatrale persoonlijkheidsstoornis
 Thoracic Outlet Syndroom
-TIA
 Tic
 Ticstoornis
 Tinnitus
@@ -1064,10 +1064,10 @@ Ulcus molle
 Urethritis
 Urolagnie
 Usher-syndroom
+VCJD
 Vaginisme
 Vasculaire dementie
 Vasculitis
-VCJD
 Vegetatieve stoornissen
 Ventrikelfibrilleren
 Ventrikelseptumdefect
@@ -1095,12 +1095,11 @@ Voetbalknie
 Vogelpest
 Von Recklinghausen (ziekte van)
 Voyeurisme
-Waardenburg-syndroom
-Wernicke-syndroom
+WAG/Rij rat
 Waan
 Waanstoornis 
+Waardenburg-syndroom
 Waardenburgsyndroom
-WAG/Rij rat
 Wallen
 Waterpokken
 Watervrees 
@@ -1109,6 +1108,7 @@ Waterzaknier
 Wegener (ziekte van)
 Weil (ziekte van)
 Weltschmerz
+Wernicke-syndroom
 West-Nijlziekte
 Whiplash
 Wiegendood
@@ -1140,6 +1140,7 @@ Ziekte van Dupuytren
 Ziekte van Hirschsprung
 Ziekte van Ledderhose
 Ziekte van Newcastle
+Ziekte van Paget
 Ziekte van Parkinson
 Ziekte van Peyronie
 Ziekte van Pick
@@ -1157,3 +1158,4 @@ Zwarte Dood
 Zweepslag
 Zweer
 Zweetvoeten
+syncope

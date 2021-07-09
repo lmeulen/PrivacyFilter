@@ -8,13 +8,58 @@ import osmnx as ox
 import pandas as pd
 import requests
 import unicodedata
+import string
 from bs4 import BeautifulSoup
 from os.path import join
+
+verbs = []
 
 
 def remove_accents(text):
     text = unicodedata.normalize('NFD', str(text)).encode('ascii', 'ignore')
     return str(text.decode("utf-8"))
+
+
+def filter_and_save(df, column, filename, min_length=1, filter_verbs=True):
+    df = df[df[column].str.len() > min_length].drop_duplicates()
+    df[column] = df.apply(lambda x: remove_accents(x[column]), axis=1)
+    if filter_verbs:
+        df = df[~df[column].isin(verbs)]
+    df = df.sort_values(column)
+    df.to_csv(join('datasets', filename), index=False)
+
+
+def update_werkwoorden(download=True, min_length=3):
+    global verbs
+    if download:
+        lst = []
+        for ltr in list(string.ascii_uppercase):
+            parse_next_page = True
+            page = 1
+            while parse_next_page:
+                url = 'https://www.mijnwoordenboek.nl/werkwoorden/NL/' + ltr + '/' + str(page)
+                print(url)
+                reqs = requests.get(url)
+                soup = BeautifulSoup(reqs.text, 'lxml')
+                div = soup.find_all("div", {"style": "clear:both;"})[0]
+                cnt = 0
+                for u in div.find_all("a"):
+                    cnt += 1
+                    lst.append(u.text)
+                print(cnt)
+                parse_next_page = (cnt > 230)
+                page += 1
+
+        verbs = pd.DataFrame(lst, columns=['werkwoord'])
+        verbs = verbs[verbs.werkwoord.str.len() >= min_length].drop_duplicates()
+        verbs = verbs.sort_values('werkwoord')
+        verbs = verbs.iloc[2:].reset_index()
+        verbs = verbs[['werkwoord']]
+        verbs.werkwoord = verbs.werkwoord.str.title()
+        verbs.to_csv(join('datasets', 'werkwoorden.csv'), index=False)
+    else:
+        verbs = pd.read_csv(join('datasets', 'werkwoorden.csv'))
+    verbs = verbs.werkwoord.values
 
 
 def update_streetnames(download=True, min_length=6):
@@ -37,11 +82,9 @@ def update_streetnames(download=True, min_length=6):
     for name in ['Gelderland', 'Overijssel', 'Drenthe', 'Groningen', 'Friesland', 'Zeeland', 'Utrecht',
                  'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
         lst.append(pd.read_csv(join('datasets', 'RAW_streets', 'streets_' + name + '.csv')))
-    streetnames = pd.concat(lst, axis=0, ignore_index=True).drop_duplicates()
+    streetnames = pd.concat(lst, axis=0, ignore_index=True)
     streetnames.columns = ['straatnaam']
-    streetnames = streetnames[streetnames.straatnaam.str.len() >= min_length]
-    streetnames.straatnaam = streetnames.apply(lambda x: remove_accents(x.straatnaam), axis=1)
-    streetnames.to_csv(join('datasets', 'streets_Nederland.csv'), index=False)
+    filter_and_save(streetnames, 'straatnaam', 'streets_Nederland.csv', min_length=min_length, filter_verbs=True)
 
 
 def update_places(min_length=4):
@@ -51,10 +94,8 @@ def update_places(min_length=4):
     total = pd.DataFrame(cbsodata.get_data('84992NED'))
     places = np.append(
         np.append(np.append(total.Woonplaatsen.values, total.Naam_2.values), total.Naam_4.values), total.Naam_6.values)
-    places = pd.DataFrame(places, columns=['plaatsnaam']).drop_duplicates()
-    places = places[places.plaatsnaam.str.len() >= min_length]
-    places.plaatsnaam = places.apply(lambda x: remove_accents(x.plaatsnaam), axis=1)
-    places.to_csv(join("datasets", "places.csv"), index=False)
+    places = pd.DataFrame(places, columns=['plaatsnaam'])
+    filter_and_save(places, 'plaatsnaam', filename='places.csv', min_length=min_length, filter_verbs=True)
 
 
 def update_firstnames():
@@ -70,9 +111,8 @@ def update_firstnames():
         voornaam = node.find("voornaam")
         if voornaam is not None:
             firstnames.append({"voornaam": voornaam.text})
-    firstnames = pd.DataFrame(firstnames).drop_duplicates()
-    firstnames.voornaam = firstnames.apply(lambda x: remove_accents(x.voornaam), axis=1)
-    firstnames.to_csv(join("datasets", "firstnames.csv"), index=False)
+    firstnames = pd.DataFrame(firstnames)
+    filter_and_save(firstnames, 'voornaam', filename='firstnames.csv', min_length=1, filter_verbs=True)
 
 
 def update_lastnames():
@@ -94,9 +134,8 @@ def update_lastnames():
                 lastnames.append({"achternaam": prefix.text + " " + lastname.text})
             else:
                 lastnames.append({"achternaam": lastname.text})
-    lastnames = pd.DataFrame(lastnames).drop_duplicates()
-    lastnames.achternaam = lastnames.apply(lambda x: remove_accents(x.achternaam), axis=1)
-    lastnames.to_csv(join("datasets", "lastnames.csv"), index=False)
+    lastnames = pd.DataFrame(lastnames)
+    filter_and_save(lastnames, 'achternaam', filename='lastnames.csv', min_length=1, filter_verbs=True)
 
 
 def update_diseases():
@@ -110,9 +149,10 @@ def update_diseases():
     diseases = []
     for tag in div.find_all("li"):
         diseases.append(tag.text)
+    for d in ['Corona', 'Covid', 'Covid-19']:
+        diseases.append(d)
     diseases = pd.DataFrame(diseases, columns=['aandoening'])
-    diseases.aandoening = diseases.apply(lambda x: remove_accents(x.aandoening), axis=1)
-    diseases.to_csv(join("datasets", "diseases.csv"), index=False)
+    filter_and_save(diseases, 'aandoening', filename='diseases.csv', min_length=1, filter_verbs=False)
 
 
 def update_medicines():
@@ -141,9 +181,8 @@ def update_medicines():
     new = medicines["original"].str.replace('De Tuinen ', '').str.replace('/', ' ').str.replace(',', ' ') \
         .str.replace('(', ' ').str.split(" ", n=1, expand=True)
     medicines['medicijn'] = new[0].str.title()
-    medicines = medicines[['medicijn']].sort_values('medicijn').drop_duplicates()
-    medicines.medicijn = medicines.apply(lambda x: remove_accents(x.medicijn), axis=1)
-    medicines.to_csv(join("datasets", "medicines.csv"), index=False)
+
+    filter_and_save(medicines, 'medicijn', filename='medicines.csv', min_length=1, filter_verbs=False)
 
 
 def update_nationalities():
@@ -151,9 +190,8 @@ def update_nationalities():
     # Download nationalitites
     #
     total = pd.DataFrame(cbsodata.get_data('03743'))
-    nationalities = pd.DataFrame(total.Nationaliteiten.unique()[1:-1], columns=['nationaliteit']).drop_duplicates()
-    nationalities.nationaliteit = nationalities.apply(lambda x: remove_accents(x.nationaliteit), axis=1)
-    nationalities.to_csv(join("datasets", "nationalities.csv"), index=False)
+    nationalities = pd.DataFrame(total.Nationaliteiten.unique()[1:-1], columns=['nationaliteit'])
+    filter_and_save(nationalities, 'nationaliteit', filename='nationalities.csv', min_length=1, filter_verbs=False)
 
 
 def update_countries():
@@ -161,7 +199,6 @@ def update_countries():
     # Download countries
     #
     url = 'https://nl.wikipedia.org/wiki/Lijst_van_landen_in_2020'
-    print(url)
     reqs = requests.get(url)
     soup = BeautifulSoup(reqs.text, 'lxml')
     tbls = soup.find_all("table", {"class": "wikitable"})
@@ -178,20 +215,30 @@ def update_countries():
                 naam = re.sub("\(.*", "", naam)
                 lst.append(naam)
                 lst.append(cells[3].text.strip().split(":")[1].split('/')[0].strip())
-    countries = pd.DataFrame(lst, columns=['land']).drop_duplicates()
-    countries.land = countries.apply(lambda x: remove_accents(x.land), axis=1)
-    countries.to_csv(join("datasets", "countries.csv"), index=False)
+    countries = pd.DataFrame(lst, columns=['land'])
+    filter_and_save(countries, 'land', filename='countries.csv', min_length=1, filter_verbs=False)
 
 
 def update_datasets():
+    print('Verbs...')
+    update_werkwoorden(download=False)
+    print('Streets...')
     update_streetnames(download=False, min_length=6)
-    # update_places(min_length=4)
-    # update_firstnames()
-    # update_lastnames()
-    # update_diseases()
-    # update_medicines()
-    # update_nationalities()
-    # update_countries()
+    print('Places...')
+    update_places(min_length=4)
+    print('First names...')
+    update_firstnames()
+    print('Last names...')
+    update_lastnames()
+    print('Diseases...')
+    update_diseases()
+    print('Medicines...')
+    update_medicines()
+    print('Nationalities...')
+    update_nationalities()
+    print('Countries...')
+    update_countries()
+    print('Done')
 
 
 if __name__ == "__main__":
