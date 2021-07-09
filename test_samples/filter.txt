@@ -3,3 +3,4 @@ Ik woon in Asten~Ik woon in <PLAATS>
 Ik woon in asten~Ik woon in <PLAATS>
 Ik heet Melvin en woon in Asten~Ik heet <NAAM> en woon in <PLAATS>
 welke stad is dit?~welke stad is dit?
+Hebben jullie de CV van Piet voor Kees en mij?~Hebben jullie de CV van <NAAM> voor <NAAM> en mij?
