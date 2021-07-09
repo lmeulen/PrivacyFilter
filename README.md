@@ -33,6 +33,9 @@ FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
 
 - Named Entity Recognition with Spacy (optional)
 
+Verbs occur as names, streetnames and places. Keyword filters are therefore cleaned from verbs. 
+They are removed from the text when the NER sees them as names/streets/places.
+
 ## Dependencies
 For using the PrivacyFilter class:
 - FlashText
