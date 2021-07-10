@@ -208,15 +208,7 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(txt):
-        result = txt
-        result = re.sub("< ", "<", result)
-        result = re.sub(" >", ">", result)
-        result = re.sub("<<", "<", result)
-        result = re.sub(">>", ">", result)
-        result = re.sub("<GPE>", "<LOCATIE>", result)
-        result = re.sub("<PERSON>", "<NAAM>", result)
-        result = re.sub("<NAAM> <NAAM>", "<NAAM>", result)
-        result = re.sub("<ADRES> <GETAL>", "<ADRES>", result)
+        result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
