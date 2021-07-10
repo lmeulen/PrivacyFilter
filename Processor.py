@@ -93,7 +93,6 @@ class KeywordProcessor(object):
         sequence_end_pos = 0
         idx = 0
         sentence_len = len(sentence)
-        curr_cost = 0
         while idx < sentence_len:
             char = sentence[idx]
             # when we reach whitespace
@@ -142,7 +141,6 @@ class KeywordProcessor(object):
                             current_word = current_word_continued
                     current_dict = self.keyword_trie_dict
                     if longest_sequence_found:
-                        curr_cost = 0
                         new_sentence.append(longest_sequence_found + current_white_space)
                         current_word = ''
                     else:
