@@ -2,7 +2,6 @@ import time
 import re
 import os
 import unicodedata
-#from flashtext import KeywordProcessor
 import nl_core_news_sm
 from Processor import KeywordProcessor
 
