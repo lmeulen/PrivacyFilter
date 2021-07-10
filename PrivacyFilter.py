@@ -32,7 +32,6 @@ class PrivacyFilter:
             for line in f.readlines():
                 items_count += 1
                 line = line.rstrip()
-                line = self.remove_accents(line)  # TODO: move to dataupdater to
                 items.append(line)
 
         self.nr_keywords += items_count
@@ -63,7 +62,7 @@ class PrivacyFilter:
                     for c in self._punctuation:
                         self.keyword_processor.add_keyword(
                             "{n}{c}".format(n=name, c=c),
-                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
+                            "{n}{c}".format(n=fields[field]["replacement"], c=c)
                         )
             else:
                 for name in self.file_to_list(field):
