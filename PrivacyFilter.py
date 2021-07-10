@@ -32,7 +32,6 @@ class PrivacyFilter:
             for line in f.readlines():
                 items_count += 1
                 line = line.rstrip()
-                line = self.remove_accents(line)  # TODO: move to dataupdater to
                 items.append(line)
 
         self.nr_keywords += items_count
@@ -200,23 +199,7 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(txt):
-        result = txt
-        result = re.sub("< ", "<", result)
-        result = re.sub(" >", ">", result)
-        result = re.sub("<<", "<", result)
-        result = re.sub(">>", ">", result)
-        result = re.sub("<GPE>", "<LOCATIE>", result)
-        result = re.sub("<PERSON>", "<NAAM>", result)
-        result = re.sub("<NAAM> <NAAM>", "<NAAM>", result)
-        result = re.sub("<ADRES> <GETAL>", "<ADRES>", result)
-        result = re.sub(" ([ ,.:;?!])", "\\1", result)
-        result = result.strip()
-        return result
-
-    @staticmethod
-    def full_cleanup_text(txt):
-        result = txt
-        result = re.sub("\<.*?\>", "<FILTERED>", result)
+        result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
