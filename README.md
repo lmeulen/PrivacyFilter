@@ -1,17 +1,21 @@
 # PrivacyFilter
 Privacy Filter for free text
 
-See also: [Remove personal informaton from a text with Python](https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074)
-on [TowardsDataScience.com](https://towardsdatascience.com).
+See also: 
+[Remove personal informaton from a text with Python]
+(https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074)
+on 
+[TowardsDataScience.com](https://towardsdatascience.com).
 
 This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
 and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
 
-A PrivacyFilter class is available with limited external dependencies (only FlashText). There is also a secure webservice
-implemented (FreeTextAPI).
+A PrivacyFilter class is available with limited external dependencies (only FlashText). There is also a secure 
+webservice implemented (FreeTextAPI).
 
 There are two type of replacements; first regular expression based, then the forbidden word lists are removed using the
-FlashText KeywordProcessor is used (Aho-Corasick algorithm based).
+KeywordProcessor (Aho-Corasick algorithm based). The KeywordProcessor is based on 
+[FlashText](https://github.com/vi3k6i5/flashtext).
 
 - Regular expression based replacements:
   - URL
@@ -38,7 +42,6 @@ They are removed from the text when the NER sees them as names/streets/places.
 
 ## Dependencies
 For using the PrivacyFilter class:
-- FlashText
 - Spacy, including nl_core_news_ls
 
 Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
@@ -113,7 +116,8 @@ service is available at https://localhost:8000/docs.
 It is possible to run the  filter on Heroku, al required specification files are in place. Do note 
 that the free version of Heroku has an application limit of 500MB. To be able to run the filter
 on Heroku for free some meausres must be taken to reduce the application size. This can be done
-be reducing the file sizes in datasets and/or not loading the NLP part.  On a paid server there is sufficient capacity to run the complete server.
+be reducing the file sizes in datasets and/or not loading the NLP part.  On a paid server there is 
+sufficient capacity to run the complete server.
 
 See 
 [Create a Privacy Filter Web Service with FastAPI and Heroku](https://medium.com/4755ef1ccb25)
