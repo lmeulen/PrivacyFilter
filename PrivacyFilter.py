@@ -2,8 +2,9 @@ import time
 import re
 import os
 import unicodedata
-from flashtext import KeywordProcessor
+#from flashtext import KeywordProcessor
 import nl_core_news_sm
+from Processor import KeywordProcessor
 
 
 class PrivacyFilter:
@@ -57,17 +58,8 @@ class PrivacyFilter:
         }
 
         for field in fields:
-            # If there is a punctuation list, use it.
-            if fields[field]["punctuation"] is not None:
-                for name in self.file_to_list(field):
-                    for c in self._punctuation:
-                        self.keyword_processor.add_keyword(
-                            "{n}{c}".format(n=name, c=c),
-                            "<{n}>{c}".format(n=fields[field]["replacement"], c=c)
-                        )
-            else:
-                for name in self.file_to_list(field):
-                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
+            for name in self.file_to_list(field):
+                self.keyword_processor.add_keyword(name, fields[field]["replacement"], fields[field]["punctuation"])
 
         for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
             self.keyword_processor_names.add_keyword(name, "<NAAM>")
@@ -218,6 +210,14 @@ class PrivacyFilter:
         result = re.sub("<PERSON>", "<NAAM>", result)
         result = re.sub("<NAAM> <NAAM>", "<NAAM>", result)
         result = re.sub("<ADRES> <GETAL>", "<ADRES>", result)
+        result = re.sub(" ([ ,.:;?!])", "\\1", result)
+        result = result.strip()
+        return result
+
+    @staticmethod
+    def full_cleanup_text(txt):
+        result = txt
+        result = re.sub("\<.*?\>", "<FILTERED>", result)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
