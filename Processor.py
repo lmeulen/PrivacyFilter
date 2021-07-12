@@ -23,7 +23,7 @@ class KeywordProcessor(object):
         self.keyword_trie_dict = dict()
         self.case_sensitive = case_sensitive
 
-    def __setitem__(self, keyword, clean_name=None, punctuation=None):
+    def __setitem__(self, keyword, clean_name, punctuation=None):
         """To add keyword to the dictionary
         pass the keyword and the clean name it maps to.
         Args:
@@ -38,8 +38,6 @@ class KeywordProcessor(object):
         if punctuation is None:
             punctuation = ['']
         status = False
-        if not clean_name and keyword:
-            clean_name = keyword
 
         if keyword and clean_name:
             if not self.case_sensitive:
@@ -56,7 +54,7 @@ class KeywordProcessor(object):
             status = True
         return status
 
-    def add_keyword(self, keyword, clean_name=None, punctuation=None):
+    def add_keyword(self, keyword, clean_name, punctuation=None):
         """To add one or more keywords to the dictionary
         pass the keyword and the clean name it maps to.
         Args:
