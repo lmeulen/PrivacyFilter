@@ -22,8 +22,8 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
     result = self.pfilter.cleanup_text(result)
 
     # Replace any filtered output with <FILTERED> for easier runs
-    result = re.sub("\<[A-Z]+\>", "<FILTERED>", result)
-    clean = re.sub("\<[A-Z]+\>", "<FILTERED>", clean)
+    result = re.sub("\<[A-Z_]+\>", "<FILTERED>", result)
+    clean = re.sub("\<[A-Z_]+\>", "<FILTERED>", clean)
 
     # Do the assertion
     self.assertEqual(
