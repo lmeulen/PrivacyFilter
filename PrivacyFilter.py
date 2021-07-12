@@ -2,8 +2,8 @@ import time
 import re
 import os
 import unicodedata
-from flashtext import KeywordProcessor
 import nl_core_news_lg as nl_nlp
+from Processor import KeywordProcessor
 
 
 class PrivacyFilter:
@@ -112,7 +112,7 @@ class PrivacyFilter:
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'((?:[a-z0-9.+-]*):?//)?'                                  # scheme is validated separately
+            r'([a-z0-9.+-]*:?//)?'                                      # scheme is validated separately
             r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
             r'(?::\d{2,5})?'                                            # port
@@ -148,7 +148,7 @@ class PrivacyFilter:
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.]((\d{4}|\d{2}))?",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
             "<DATUM>", text)
         return text
 
@@ -257,9 +257,10 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(txt):
-        result = txt
-        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", txt)
-        result = re.sub(" ([ ,.:;?!])", "\\1", result)
+        result = re.sub("<[A-Z _]+>", " <FILTERED> ", txt)          # replace all tags by <FILTERED>
+        result = re.sub(" ([ ,.:;?!])", "\\1", result)              # remove unneccessary whitespacing
+        result = re.sub(" +", " ", result)                          # remove multiple spaces
+        result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
         result = result.strip()
         return result
 
