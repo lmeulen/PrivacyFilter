@@ -45,8 +45,10 @@ class PrivacyFilter:
         # implementation of a token based algorithm.
 
         fields = {
-            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
-            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>",
+                                                         "punctuation": None if nlp_filter else self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>",
+                                                        "punctuation": None if nlp_filter else self._punctuation},
             os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
             os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
             os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
@@ -68,11 +70,12 @@ class PrivacyFilter:
                 for name in self.file_to_list(field):
                     self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
-        for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            self.keyword_processor_names.add_keyword(name, "<NAAM>")
+        if not nlp_filter:
+            for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
+                self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
-        for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            self.keyword_processor_names.add_keyword(name, "<NAAM>")
+            for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
+                self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -213,21 +216,25 @@ class PrivacyFilter:
         result = result.strip()
         return result
 
-    def filter(self, inputtext, set_numbers_zero=False, nlp_filter=True):
+    def filter(self, text, set_numbers_zero=False):
         if not self.initialised:
             self.initialize()
-
-        text = " " + inputtext + " "
 
         if self.clean_accents:
             text = self.remove_accents(text)
 
-        text = self.filter_regular_expressions(text, set_numbers_zero)
-        text = self.filter_keyword_processors(text)
-        if nlp_filter:
+        if self.use_nlp:
             text = self.filter_nlp(text)
+        else:
+            text = self.filter_static(text, set_numbers_zero)
 
         return self.cleanup_text(text)
+
+    def filter_static(self, text, set_numbers_zero):
+        text = " " + text + " "
+        text = self.filter_regular_expressions(text, set_numbers_zero)
+        text = self.filter_keyword_processors(text)
+        return text
 
 
 def insert_newlines(string, every=64, window=10):
