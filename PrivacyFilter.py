@@ -20,6 +20,7 @@ class PrivacyFilter:
 
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+        self._capture_words = ["PROPN", "NOUN", "ADJ"]
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
@@ -188,10 +189,9 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
         text = self.keyword_processor.replace_keywords(text)
         text = self.keyword_processor_names.replace_keywords(text)
-        return text[:-1]  # Remove the trailing space
+        return text
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
@@ -208,32 +208,49 @@ class PrivacyFilter:
 
         doc = self.nlp(text)  # Run text through NLP
 
-        # Word, tags, word type, scanne
-        tagged_words = [(str(word), word.tag_, word.pos_, False) for word in doc]
+        # Word, tags, word type, entity type
+        tagged_words = [(str(word), word.tag_, word.pos_, word.ent_type_) for word in doc]
         tagged_words_new = []
 
-        forbidden = ["PROPN", "NOUN"]
         index = 0
         length = len(tagged_words)
+        capture_string = ""
+
         for tagged_word in tagged_words:
-            word, tags, word_type, scanned = tagged_word
+            word, tags, word_type, entity_type = tagged_word
+            is_capture_word = word_type in self._capture_words
 
-            #TODO: traverse list till no more forbidden words are found and scan them together
-            #TODO: NUM eruit halen en vervangen met <tag> of 0
+            # If it is a capture word, add it to the string to be tested
+            if is_capture_word:
+                capture_string += "{} ".format(word)
 
-            # Check if it is a word type that must be filtered.
-            if word_type in forbidden:
-                replaced = self.keyword_processor.replace_keywords(word)
-                tagged_words_new.append((replaced, tags, word_type, scanned))  # Replace the word, even if it wasn't replaced
+            # Check if next word is also forbidden
+            if is_capture_word and index + 1 < length:
+                next_word = tagged_words[index + 1]
+                if next_word[2] in self._capture_words:
+                    index += 1
+                    continue
+
+            # Filter the collected words if they are captured
+            if is_capture_word:
+                if entity_type == "":
+                    replaced = self.keyword_processor.replace_keywords(capture_string).strip()
+                else:
+                    replaced = "<{}>".format(entity_type)
+
+                # Replace the word, even if it wasn't replaced
+                tagged_words_new.append((replaced, tags, word_type, entity_type))
             else:
                 tagged_words_new.append(tagged_word)  # Nothing has changed
 
             index += 1
+            capture_string = ""
 
+        # Rebuild the string from the filtered output
         new_string = ""
         for tagged_word in tagged_words_new:
-            word, tags, word_type, scanned = tagged_word
-            new_string += (" " if word_type != "PUNCT" else "") + word
+            word, tags, word_type, entity_type = tagged_word
+            new_string += (" " if word_type != "PUNCT" else "") + word  # Prepend spaces, except for punctuation.
 
         new_string = new_string.strip()
         return new_string
@@ -241,7 +258,7 @@ class PrivacyFilter:
     @staticmethod
     def cleanup_text(txt):
         result = txt
-        #result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
+        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", txt)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
@@ -255,6 +272,7 @@ class PrivacyFilter:
 
         if self.use_nlp:
             text = self.filter_nlp(text)
+            text = self.filter_regular_expressions(text, set_numbers_zero)
         else:
             text = self.filter_static(text, set_numbers_zero)
 
@@ -314,7 +332,7 @@ def main():
     start = time.time()
     nr_sentences = 100
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=True)
+        zin = pfilter.filter(zin, set_numbers_zero=False)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
