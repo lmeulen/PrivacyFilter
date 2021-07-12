@@ -113,7 +113,7 @@ class TestKeywordProcessor(PFTest):
 class TestFilter(PFTest):
     def test_filter(self):
         for sample in file_to_samples("filter.txt"):
-            run_test_function_with_data(self, self.pfilter.filter, sample, set_numbers_zero=False, nlp_filter=False)
+            run_test_function_with_data(self, self.pfilter.filter, sample, set_numbers_zero=False)
 
 
 if __name__ == '__main__':

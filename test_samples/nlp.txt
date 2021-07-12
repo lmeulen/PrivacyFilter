@@ -1,3 +1,10 @@
 Ik ben Melvin~Ik ben <NAAM>
 Ik woon in Beverijk~Ik woon in <LOCATIE>
 Ik heet Melvin en woon in Beverwijk~Ik heet <NAAM> en woon in <LOCATIE>
+Melvin is hoe ik heet en Beverwijk is waar ik woon.~<NAAM> is hoe ik heet en <LOCATIE> is waar ik woon.
+Gert Jan woont in Den Haag~<NAAM> woont in <PLAATS>
+Ik ben melvin, 19 jaar, en woon in Beverwijk~Ik ben <FILTERED>, <FILTERED> <FILTERED>, en woon in <FILTERED>
+Den Helder is waar Ben woont~<FILTERED> is waar <FILTERED> woont
+088-1234 is het telefoonnummer van NS in Utrecht~<FILTERED>-<FILTERED> het telefoonnummer van <FILTERED> in <FILTERED>
+Ben werkt bij NS~<FILTERED> werkt bij <FILTERED>
+De NS makeup spiegel~De <FILTERED> makeup spiegel

@@ -2,8 +2,8 @@ import time
 import re
 import os
 import unicodedata
-import nl_core_news_sm
-from Processor import KeywordProcessor
+from flashtext import KeywordProcessor
+import nl_core_news_lg as nl_nlp
 
 
 class PrivacyFilter:
@@ -20,6 +20,7 @@ class PrivacyFilter:
 
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+        self._capture_words = ["PROPN", "NOUN", "ADJ"]
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
@@ -45,8 +46,10 @@ class PrivacyFilter:
         # implementation of a token based algorithm.
 
         fields = {
-            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
-            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>", "punctuation": self._punctuation},
+            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>",
+                                                         "punctuation": None if nlp_filter else self._punctuation},
+            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>",
+                                                        "punctuation": None if nlp_filter else self._punctuation},
             os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
             os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
             os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
@@ -56,14 +59,24 @@ class PrivacyFilter:
         }
 
         for field in fields:
-            for name in self.file_to_list(field):
-                self.keyword_processor.add_keyword(name, fields[field]["replacement"], fields[field]["punctuation"])
+            # If there is a punctuation list, use it.
+            if fields[field]["punctuation"] is not None:
+                for name in self.file_to_list(field):
+                    for c in self._punctuation:
+                        self.keyword_processor.add_keyword(
+                            "{n}{c}".format(n=name, c=c),
+                            "{n}{c}".format(n=fields[field]["replacement"], c=c)
+                        )
+            else:
+                for name in self.file_to_list(field):
+                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
-        for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
-            self.keyword_processor_names.add_keyword(name, "<NAAM>")
+        if not nlp_filter:
+            for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
+                self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
-        for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
-            self.keyword_processor_names.add_keyword(name, "<NAAM>")
+            for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
+                self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
@@ -108,7 +121,7 @@ class PrivacyFilter:
         )
 
         if nlp_filter:
-            self.nlp = nl_core_news_sm.load()
+            self.nlp = nl_nlp.load()
             self.use_nlp = True
 
         self.clean_accents = clean_accents
@@ -152,7 +165,7 @@ class PrivacyFilter:
 
     @staticmethod
     def remove_postal_codes(text):
-        return re.sub(r"\b([0-9]{4}\s?[a-zA-Z]{2})", "<POSTCODE>", text)
+        return re.sub(r"\b([0-9]{4}\s?[a-zA-Z]{2})\b", "<POSTCODE>", text)
 
     @staticmethod
     def remove_accents(text):
@@ -176,10 +189,9 @@ class PrivacyFilter:
         return result
 
     def filter_keyword_processors(self, text):
-        text += ' '  # Add a space after the sentence to fix sentences which do not end with correct punctuation.
         text = self.keyword_processor.replace_keywords(text)
         text = self.keyword_processor_names.replace_keywords(text)
-        return text[:-1]  # Remove the trailing space
+        return text
 
     def filter_regular_expressions(self, text, set_numbers_zero=True):
         text = self.remove_url(text)
@@ -190,35 +202,87 @@ class PrivacyFilter:
         text = self.remove_numbers(text, set_numbers_zero)
         return text
 
-    def filter_nlp(self, txt):
+    def filter_nlp(self, text):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
-        doc = self.nlp(txt)
-        txt = self.doc2string(doc)
-        return txt
+
+        doc = self.nlp(text)  # Run text through NLP
+
+        # Word, tags, word type, entity type
+        tagged_words = [(str(word), word.tag_, word.pos_, word.ent_type_) for word in doc]
+        tagged_words_new = []
+
+        index = 0
+        length = len(tagged_words)
+        capture_string = ""
+
+        for tagged_word in tagged_words:
+            word, tags, word_type, entity_type = tagged_word
+            is_capture_word = word_type in self._capture_words
+
+            # If it is a capture word, add it to the string to be tested
+            if is_capture_word:
+                capture_string += "{} ".format(word)
+
+            # Check if next word is also forbidden
+            if is_capture_word and index + 1 < length:
+                next_word = tagged_words[index + 1]
+                if next_word[2] in self._capture_words:
+                    index += 1
+                    continue
+
+            # Filter the collected words if they are captured
+            if is_capture_word:
+                if entity_type == "":
+                    replaced = self.keyword_processor.replace_keywords(capture_string).strip()
+                else:
+                    replaced = "<{}>".format(entity_type)
+
+                # Replace the word, even if it wasn't replaced
+                tagged_words_new.append((replaced, tags, word_type, entity_type))
+            else:
+                tagged_words_new.append(tagged_word)  # Nothing has changed
+
+            index += 1
+            capture_string = ""
+
+        # Rebuild the string from the filtered output
+        new_string = ""
+        for tagged_word in tagged_words_new:
+            word, tags, word_type, entity_type = tagged_word
+            new_string += (" " if word_type != "PUNCT" else "") + word  # Prepend spaces, except for punctuation.
+
+        new_string = new_string.strip()
+        return new_string
 
     @staticmethod
     def cleanup_text(txt):
-        result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
+        result = txt
+        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", txt)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
 
-    def filter(self, inputtext, set_numbers_zero=False, nlp_filter=True):
+    def filter(self, text, set_numbers_zero=False):
         if not self.initialised:
             self.initialize()
-
-        text = " " + inputtext + " "
 
         if self.clean_accents:
             text = self.remove_accents(text)
 
-        text = self.filter_regular_expressions(text, set_numbers_zero)
-        text = self.filter_keyword_processors(text)
-        if nlp_filter:
+        if self.use_nlp:
             text = self.filter_nlp(text)
+            text = self.filter_regular_expressions(text, set_numbers_zero)
+        else:
+            text = self.filter_static(text, set_numbers_zero)
 
         return self.cleanup_text(text)
+
+    def filter_static(self, text, set_numbers_zero):
+        text = " " + text + " "
+        text = self.filter_regular_expressions(text, set_numbers_zero)
+        text = self.filter_keyword_processors(text)
+        return text
 
 
 def insert_newlines(string, every=64, window=10):
@@ -268,7 +332,7 @@ def main():
     start = time.time()
     nr_sentences = 100
     for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False, nlp_filter=True)
+        zin = pfilter.filter(zin, set_numbers_zero=False)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
