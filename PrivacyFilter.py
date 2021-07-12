@@ -202,16 +202,46 @@ class PrivacyFilter:
         text = self.remove_numbers(text, set_numbers_zero)
         return text
 
-    def filter_nlp(self, txt):
+    def filter_nlp(self, text):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
-        doc = self.nlp(txt)
-        txt = self.doc2string(doc)
-        return txt
+
+        doc = self.nlp(text)  # Run text through NLP
+
+        # Word, tags, word type, scanne
+        tagged_words = [(str(word), word.tag_, word.pos_, False) for word in doc]
+        tagged_words_new = []
+
+        forbidden = ["PROPN", "NOUN"]
+        index = 0
+        length = len(tagged_words)
+        for tagged_word in tagged_words:
+            word, tags, word_type, scanned = tagged_word
+
+            #TODO: traverse list till no more forbidden words are found and scan them together
+            #TODO: NUM eruit halen en vervangen met <tag> of 0
+
+            # Check if it is a word type that must be filtered.
+            if word_type in forbidden:
+                replaced = self.keyword_processor.replace_keywords(word)
+                tagged_words_new.append((replaced, tags, word_type, scanned))  # Replace the word, even if it wasn't replaced
+            else:
+                tagged_words_new.append(tagged_word)  # Nothing has changed
+
+            index += 1
+
+        new_string = ""
+        for tagged_word in tagged_words_new:
+            word, tags, word_type, scanned = tagged_word
+            new_string += (" " if word_type != "PUNCT" else "") + word
+
+        new_string = new_string.strip()
+        return new_string
 
     @staticmethod
     def cleanup_text(txt):
-        result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
+        result = txt
+        #result = re.sub("\<[A-Z ]+\>", "<FILTERED>", txt)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
