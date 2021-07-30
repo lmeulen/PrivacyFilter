@@ -20,7 +20,7 @@ class PrivacyFilter:
 
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
-        self._capture_words = ["PROPN", "NOUN", "ADJ"]
+        self._capture_words = ["PROPN", "NOUN"]
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
@@ -172,22 +172,6 @@ class PrivacyFilter:
         text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
         return str(text.decode("utf-8"))
 
-    @staticmethod
-    def doc2string(doc):
-        result = ""
-        prev = ""
-        for X in doc:
-            if not X.ent_type_:
-                result += X.text
-            else:
-                if prev == "<":
-                    result += X.text
-                else:
-                    result += "<" + X.ent_type_ + ">"
-            result += " "
-            prev = X.text
-        return result
-
     def filter_keyword_processors(self, text):
         text = self.keyword_processor.replace_keywords(text)
         text = self.keyword_processor_names.replace_keywords(text)
@@ -202,7 +186,7 @@ class PrivacyFilter:
         text = self.remove_numbers(text, set_numbers_zero)
         return text
 
-    def filter_nlp(self, text):
+    def filter_nlp(self, text, set_numbers_zero=False):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
 
@@ -216,6 +200,8 @@ class PrivacyFilter:
         length = len(tagged_words)
         capture_string = ""
 
+        #print("index, length-1, word, tags, word_type, entity_type, is_capture_word, capture_string")
+
         for tagged_word in tagged_words:
             word, tags, word_type, entity_type = tagged_word
             is_capture_word = word_type in self._capture_words
@@ -223,6 +209,8 @@ class PrivacyFilter:
             # If it is a capture word, add it to the string to be tested
             if is_capture_word:
                 capture_string += "{} ".format(word)
+
+            #print(index, length-1, word, tags, word_type, entity_type, is_capture_word, '"', capture_string, '"')
 
             # Check if next word is also forbidden
             if is_capture_word and index + 1 < length:
@@ -238,10 +226,16 @@ class PrivacyFilter:
                 else:
                     replaced = "<{}>".format(entity_type)
 
-                # Replace the word, even if it wasn't replaced
-                tagged_words_new.append((replaced, tags, word_type, entity_type))
+            elif word_type == "NUM":
+                if set_numbers_zero:
+                    replaced = "0"
+                else:
+                    replaced = "<GETAL>"
             else:
-                tagged_words_new.append(tagged_word)  # Nothing has changed
+                replaced = word
+
+            # Replace the word, even if it wasn't replaced
+            tagged_words_new.append((replaced, tags, word_type, entity_type))
 
             index += 1
             capture_string = ""
@@ -256,9 +250,8 @@ class PrivacyFilter:
         return new_string
 
     @staticmethod
-    def cleanup_text(txt):
-        result = txt
-        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", txt)
+    def cleanup_text(result):
+        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", result)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
