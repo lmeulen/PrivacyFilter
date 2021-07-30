@@ -186,7 +186,7 @@ class PrivacyFilter:
         text = self.remove_numbers(text, set_numbers_zero)
         return text
 
-    def filter_nlp(self, text):
+    def filter_nlp(self, text, set_numbers_zero=False):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
 
@@ -200,6 +200,8 @@ class PrivacyFilter:
         length = len(tagged_words)
         capture_string = ""
 
+        #print("index, length-1, word, tags, word_type, entity_type, is_capture_word, capture_string")
+
         for tagged_word in tagged_words:
             word, tags, word_type, entity_type = tagged_word
             is_capture_word = word_type in self._capture_words
@@ -208,7 +210,7 @@ class PrivacyFilter:
             if is_capture_word:
                 capture_string += "{} ".format(word)
 
-            print(index, length-1, word, tags, word_type, entity_type, is_capture_word, capture_string)
+            #print(index, length-1, word, tags, word_type, entity_type, is_capture_word, '"', capture_string, '"')
 
             # Check if next word is also forbidden
             if is_capture_word and index + 1 < length:
@@ -224,10 +226,16 @@ class PrivacyFilter:
                 else:
                     replaced = "<{}>".format(entity_type)
 
-                # Replace the word, even if it wasn't replaced
-                tagged_words_new.append((replaced, tags, word_type, entity_type))
+            elif word_type == "NUM":
+                if set_numbers_zero:
+                    replaced = "0"
+                else:
+                    replaced = "<GETAL>"
             else:
-                tagged_words_new.append(tagged_word)  # Nothing has changed
+                replaced = word
+
+            # Replace the word, even if it wasn't replaced
+            tagged_words_new.append((replaced, tags, word_type, entity_type))
 
             index += 1
             capture_string = ""

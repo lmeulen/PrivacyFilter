@@ -8,3 +8,6 @@ Den Helder is waar Ben woont~<FILTERED> is waar <FILTERED> woont
 088-1234 is het telefoonnummer van NS in Utrecht~<FILTERED>-<FILTERED> het telefoonnummer van <FILTERED> in <FILTERED>
 Ben werkt bij NS~<FILTERED> werkt bij <FILTERED>
 De NS makeup spiegel~De <FILTERED> makeup spiegel
+Ik heb twee autos~Ik heb <GETAL> autos
+Aids is een ziekte die ik niet heb~<AANDOENING> is een ziekte die ik niet heb
+Er zijn meer dan tien coronavarianten~Er zijn meer dan <GETAL> coronavarianten
