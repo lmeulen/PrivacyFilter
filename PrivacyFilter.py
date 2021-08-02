@@ -247,15 +247,11 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(txt):
-        result = re.sub("<[A-Z _]+>", " <FILTERED> ", txt)          # replace all tags by <FILTERED>
+        result = re.sub("<[A-Z _]+>", " <FILTERED>", txt)          # replace all tags by <FILTERED>
         result = re.sub(" ([ ,.:;?!])", "\\1", result)              # remove unneccessary whitespacing
         result = re.sub(" +", " ", result)                          # remove multiple spaces
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
-    def cleanup_text(result):
-        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", result)
-        result = re.sub(" ([ ,.:;?!])", "\\1", result)
-        result = result.strip()
-        return result
+        return result.strip()
 
     def filter(self, text, set_numbers_zero=False):
         if not self.initialised:
