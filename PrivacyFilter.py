@@ -186,7 +186,7 @@ class PrivacyFilter:
         text = self.remove_numbers(text, set_numbers_zero)
         return text
 
-    def filter_nlp(self, text):
+    def filter_nlp(self, text, set_numbers_zero=False):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
 
@@ -247,9 +247,10 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(txt):
-        result = re.sub("<[A-Z _]+>", " <FILTERED>", txt)          # replace all tags by <FILTERED>
+        result = re.sub("<[A-Z _]+>", " <FILTERED>", txt)           # replace all tags by <FILTERED>
         result = re.sub(" ([ ,.:;?!])", "\\1", result)              # remove unneccessary whitespacing
         result = re.sub(" +", " ", result)                          # remove multiple spaces
+        result = re.sub("\n +", "\n", result)                       # remove space after newline
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
         return result.strip()
 
@@ -261,7 +262,7 @@ class PrivacyFilter:
             text = self.remove_accents(text)
 
         if self.use_nlp:
-            text = self.filter_nlp(text)
+            text = self.filter_nlp(text, set_numbers_zero)
             text = self.filter_regular_expressions(text, set_numbers_zero)
         else:
             text = self.filter_static(text, set_numbers_zero)
