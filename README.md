@@ -15,7 +15,10 @@ webservice implemented (FreeTextAPI).
 
 There are two type of replacements; first regular expression based, then the forbidden word lists are removed using the
 KeywordProcessor (Aho-Corasick algorithm based). The KeywordProcessor is based on 
-[FlashText](https://github.com/vi3k6i5/flashtext).
+[FlashText](https://github.com/vi3k6i5/flashtext). The creation of the datastructure is optimised since we are
+adding words with a set of follow-up characters (spaces, dots, comma's, etc). In the orignal implementation
+the tree is traversed for each addtion, in the optimised version the location of the word is found and from there
+th additional characters are added. 
 
 - Regular expression based replacements:
   - URL
