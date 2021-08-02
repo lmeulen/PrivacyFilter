@@ -20,7 +20,7 @@ class PrivacyFilter:
 
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
-        self._capture_words = ["PROPN", "NOUN", "ADJ"]
+        self._capture_words = ["PROPN", "NOUN"]
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
@@ -112,7 +112,7 @@ class PrivacyFilter:
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'([a-z0-9.+-]*:?//)?'                                      # scheme is validated separately
+            r'((?:[a-z0-9.+-]*):?//)?'                                  # scheme is validated separately
             r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
             r'(?::\d{2,5})?'                                            # port
@@ -172,22 +172,6 @@ class PrivacyFilter:
         text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
         return str(text.decode("utf-8"))
 
-    @staticmethod
-    def doc2string(doc):
-        result = ""
-        prev = ""
-        for X in doc:
-            if not X.ent_type_:
-                result += X.text
-            else:
-                if prev == "<":
-                    result += X.text
-                else:
-                    result += "<" + X.ent_type_ + ">"
-            result += " "
-            prev = X.text
-        return result
-
     def filter_keyword_processors(self, text):
         text = self.keyword_processor.replace_keywords(text)
         text = self.keyword_processor_names.replace_keywords(text)
@@ -238,10 +222,16 @@ class PrivacyFilter:
                 else:
                     replaced = "<{}>".format(entity_type)
 
-                # Replace the word, even if it wasn't replaced
-                tagged_words_new.append((replaced, tags, word_type, entity_type))
+            elif word_type == "NUM":
+                if set_numbers_zero:
+                    replaced = "0"
+                else:
+                    replaced = "<GETAL>"
             else:
-                tagged_words_new.append(tagged_word)  # Nothing has changed
+                replaced = word
+
+            # Replace the word, even if it wasn't replaced
+            tagged_words_new.append((replaced, tags, word_type, entity_type))
 
             index += 1
             capture_string = ""
@@ -261,6 +251,9 @@ class PrivacyFilter:
         result = re.sub(" ([ ,.:;?!])", "\\1", result)              # remove unneccessary whitespacing
         result = re.sub(" +", " ", result)                          # remove multiple spaces
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
+    def cleanup_text(result):
+        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", result)
+        result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = result.strip()
         return result
 
