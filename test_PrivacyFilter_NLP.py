@@ -43,7 +43,7 @@ class PFTestNLP(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pfilter = PrivacyFilter()
-        cls.pfilter.initialize(clean_accents=True, nlp_filter=True, worldlist_filter=False)
+        cls.pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=False)
 
 
 class TestNLP(PFTestNLP):

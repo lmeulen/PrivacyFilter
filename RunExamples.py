@@ -46,9 +46,9 @@ def compare(s1, s2, color):
 def main():
     print("Initializing filter.")
     pfilter_wl = PrivacyFilter()
-    pfilter_wl.initialize(clean_accents=True, nlp_filter=False, worldlist_filter=True)
+    pfilter_wl.initialize(clean_accents=True, nlp_filter=False, wordlist_filter=True)
     pfilter_nlp = PrivacyFilter()
-    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, worldlist_filter=False)
+    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=False)
 
     print("Running example texts:")
 

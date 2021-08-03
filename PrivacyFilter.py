@@ -42,7 +42,7 @@ class PrivacyFilter:
         self.nr_keywords += items_count
         return items
 
-    def initialize(self, clean_accents=True, nlp_filter=True, worldlist_filter=False):
+    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
@@ -127,7 +127,7 @@ class PrivacyFilter:
         if nlp_filter:
             self.nlp = nl_nlp.load()
             self.use_nlp = True
-        self.use_wordlist = worldlist_filter
+        self.use_wordlist = wordlist_filter
 
         self.clean_accents = clean_accents
         self.initialised = True
