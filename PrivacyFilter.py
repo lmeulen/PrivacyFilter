@@ -4,6 +4,7 @@ import os
 import unicodedata
 import nl_core_news_lg as nl_nlp
 from Processor import KeywordProcessor
+#from flashtext import KeywordProcessor
 
 
 class PrivacyFilter:
@@ -148,7 +149,7 @@ class PrivacyFilter:
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.]((\d{4}|\d{2}))?",
             "<DATUM>", text)
         return text
 
@@ -200,6 +201,8 @@ class PrivacyFilter:
         length = len(tagged_words)
         capture_string = ""
 
+        #print("index, length-1, word, tags, word_type, entity_type, is_capture_word, capture_string")
+
         for tagged_word in tagged_words:
             word, tags, word_type, entity_type = tagged_word
             is_capture_word = word_type in self._capture_words
@@ -207,6 +210,8 @@ class PrivacyFilter:
             # If it is a capture word, add it to the string to be tested
             if is_capture_word:
                 capture_string += "{} ".format(word)
+
+            #print(index, length-1, word, tags, word_type, entity_type, is_capture_word, '"', capture_string, '"')
 
             # Check if next word is also forbidden
             if is_capture_word and index + 1 < length:
@@ -246,9 +251,9 @@ class PrivacyFilter:
         return new_string
 
     @staticmethod
-    def cleanup_text(txt):
-        result = re.sub("<[A-Z _]+>", " <FILTERED>", txt)           # replace all tags by <FILTERED>
-        result = re.sub(" ([ ,.:;?!])", "\\1", result)              # remove unneccessary whitespacing
+    def cleanup_text(result):
+        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", result)
+        result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = re.sub(" +", " ", result)                          # remove multiple spaces
         result = re.sub("\n +", "\n", result)                       # remove space after newline
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
@@ -262,7 +267,7 @@ class PrivacyFilter:
             text = self.remove_accents(text)
 
         if self.use_nlp:
-            text = self.filter_nlp(text, set_numbers_zero)
+            text = self.filter_nlp(text)
             text = self.filter_regular_expressions(text, set_numbers_zero)
         else:
             text = self.filter_static(text, set_numbers_zero)
