@@ -273,6 +273,7 @@ class PrivacyFilter:
         if self.use_nlp:
             text = self.filter_nlp(text)
             text = self.filter_regular_expressions(text, set_numbers_zero)
+
         if self.use_wordlist:
             text = self.filter_static(text, set_numbers_zero)
 
