@@ -6,12 +6,13 @@ import re
 folder = 'example_texts'
 output_file = 'results.html'
 
-def tokenize(s):
-    return re.split('\s+', s)
+
+def tokenize(string):
+    return re.split('\s+', string)
 
 
-def untokenize(ts):
-    return ' '.join(ts)
+def untokenize(tokens):
+    return ' '.join(tokens)
 
 
 def equalize(s1, s2):
@@ -24,7 +25,7 @@ def equalize(s1, s2):
         if prev.a + prev.size != match.a:
             for i in range(prev.a + prev.size, match.a):
                 res2 += ['_' * len(l1[i])]
-            res1 += l1[prev.a + prev.size:match.a]
+            res1 += ['<b>'] + l1[prev.a + prev.size:match.a] + ['</b>']
         if prev.b + prev.size != match.b:
             for i in range(prev.b + prev.size, match.b):
                 res1 += ['_' * len(l2[i])]
@@ -37,8 +38,8 @@ def equalize(s1, s2):
 
 def compare(s1, s2):
     s1, s2 = equalize(s1, s2)
-    lft = re.sub(' +', ' ', s1.replace('_', '')).replace('<', '[').replace('>', ']')
-    rgt = re.sub(' +', ' ', s2.replace('_', '')).replace('<', '[').replace('>', ']')
+    lft = re.sub(' +', ' ', s1.replace('_', '')).replace('<FILTERED>', '[FILTERED]')
+    rgt = re.sub(' +', ' ', s2.replace('_', '')).replace('<FILTERED>', '[FILTERED]')
     return lft, rgt
 
 
@@ -47,7 +48,7 @@ def main():
     pfilter = PrivacyFilter()
     pfilter.initialize(clean_accents=True, nlp_filter=False)
 
-    print("Running example texts.")
+    print("Running example texts:")
 
     with open(output_file, 'w') as out:
         out.write('<html><style>table,th {padding: 10px;border: 2px solid black;border-collapse: collapse;text-align:'
@@ -62,8 +63,7 @@ def main():
                 out.write('<tbody>')
                 with open(os.path.join(folder, filename), 'r') as inputfile:
                     for line in inputfile.readlines():
-                        filtered = pfilter.filter(line)
-                        origin, result = compare(line, filtered)
+                        origin, result = compare(line, pfilter.filter(line))
                         out.write('<tr><td>' + origin + '</td><td>' + result + '</td></tr>')
                 out.write('</tbody>\n</table>\n')
         out.write('</body>')
