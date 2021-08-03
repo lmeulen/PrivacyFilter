@@ -25,7 +25,7 @@ def equalize(s1, s2):
         if prev.a + prev.size != match.a:
             for i in range(prev.a + prev.size, match.a):
                 res2 += ['_' * len(l1[i])]
-            res1 += ['<b>'] + l1[prev.a + prev.size:match.a] + ['</b>']
+            res1 += ['<b  style="color:red;">'] + l1[prev.a + prev.size:match.a] + ['</b>']
         if prev.b + prev.size != match.b:
             for i in range(prev.b + prev.size, match.b):
                 res1 += ['_' * len(l2[i])]
