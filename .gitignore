@@ -2,6 +2,7 @@
 /datasets/RAW*
 /.ipynb_checkpoints
 /cache
+/results.html
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,windows,linux,pycharm+all,git,powershell
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,windows,linux,pycharm+all,git,powershell

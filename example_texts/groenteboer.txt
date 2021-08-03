@@ -1,0 +1,15 @@
+Bij de groenteboer
+Groenteboer: Goedemiddag, kan ik u helpen?
+Thomas: Ja, graag. Ik wil graag twee pond aardbeien.
+Groenteboer: Dit zijn verse aardbeien, heerlijk in deze tijd van het jaar. Verder nog iets?
+Thomas: Ja, heeft u ook lekkere appels?
+Groenteboer: Zeker, deze zijn lekker en ook nog in de aanbieding. Zal ik deze doen?
+Thomas: Ja, doe daar maar een kilo van.
+Groenteboer: Verder nog iets?
+Thomas: Euh, ja. Doe maar een pond kersen.
+Groenteboer: Lekkere kersen uit de Betuwe. Anders nog iets?
+Thomas: Nee, dat was het. Hoeveel is het? 
+Groenteboer: Samen is het elf euro 80 cent 
+Thomas: Kijk eens, twaalf euro. Laat de rest maar zitten.
+Groenteboer: Bedankt. Tot ziens!
+Thomas: Tot ziens!
