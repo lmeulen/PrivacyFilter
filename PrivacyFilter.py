@@ -17,13 +17,14 @@ class PrivacyFilter:
         self.nr_keywords = 0
         self.nlp = None
         self.use_nlp = False
-
+        self.use_wordlist = False
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
 
     def to_string(self):
-        return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + ')'
+        return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + \
+               ', use_wordlist=' + str(self.use_wordlist) + ')'
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
@@ -41,7 +42,7 @@ class PrivacyFilter:
         self.nr_keywords += items_count
         return items
 
-    def initialize(self, clean_accents=True, nlp_filter=True):
+    def initialize(self, clean_accents=True, nlp_filter=True, worldlist_filter=False):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
@@ -126,6 +127,7 @@ class PrivacyFilter:
         if nlp_filter:
             self.nlp = nl_nlp.load()
             self.use_nlp = True
+        self.use_wordlist = worldlist_filter
 
         self.clean_accents = clean_accents
         self.initialised = True
@@ -271,7 +273,7 @@ class PrivacyFilter:
         if self.use_nlp:
             text = self.filter_nlp(text)
             text = self.filter_regular_expressions(text, set_numbers_zero)
-        else:
+        if self.use_wordlist:
             text = self.filter_static(text, set_numbers_zero)
 
         return self.cleanup_text(text)
