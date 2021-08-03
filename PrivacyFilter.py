@@ -4,7 +4,6 @@ import os
 import unicodedata
 import nl_core_news_lg as nl_nlp
 from Processor import KeywordProcessor
-#from flashtext import KeywordProcessor
 
 
 class PrivacyFilter:
@@ -22,6 +21,9 @@ class PrivacyFilter:
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
+
+    def tostring(self):
+        return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + ')'
 
     def file_to_list(self, filename, drop_first=True):
         items_count = 0
