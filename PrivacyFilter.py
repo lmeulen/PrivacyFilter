@@ -22,7 +22,7 @@ class PrivacyFilter:
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
 
-    def tostring(self):
+    def to_string(self):
         return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + ')'
 
     def file_to_list(self, filename, drop_first=True):
