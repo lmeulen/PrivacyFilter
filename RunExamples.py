@@ -16,8 +16,8 @@ def untokenize(tokens):
 
 
 def equalize(s1, s2):
-    l1 = tokenize(s1)
-    l2 = tokenize(s2)
+    l1 = tokenize(s1.strip())
+    l2 = tokenize(s2.strip())
     res1 = []
     res2 = []
     prev = difflib.Match(0, 0, 0)
@@ -59,7 +59,8 @@ def main():
             if filename.endswith(".txt"):
                 print(filename)
                 out.write('&nbsp\n<table style="width:1000px;">')
-                out.write('<thead>\n<tr><th style="width:50%"; colspan=2>' + filename + '</th></tr>\n</thead>\n')
+                out.write('<thead>\n<tr><th style="width:50%";>' + filename + '</th><th>' +
+                          pfilter.to_string() + '</th></tr>\n</thead>\n')
                 out.write('<tbody>')
                 with open(os.path.join(folder, filename), 'r') as inputfile:
                     for line in inputfile.readlines():
