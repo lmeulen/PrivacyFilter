@@ -15,7 +15,7 @@ def untokenize(tokens):
     return ' '.join(tokens)
 
 
-def equalize(s1, s2):
+def equalize(s1, s2, color="red"):
     l1 = tokenize(s1.strip())
     l2 = tokenize(s2.strip())
     res1 = []
@@ -25,7 +25,7 @@ def equalize(s1, s2):
         if prev.a + prev.size != match.a:
             for i in range(prev.a + prev.size, match.a):
                 res2 += ['_' * len(l1[i])]
-            res1 += ['<b  style="color:red;">'] + l1[prev.a + prev.size:match.a] + ['</b>']
+            res1 += ['<b  style="color:' + color + ';">'] + l1[prev.a + prev.size:match.a] + ['</b>']
         if prev.b + prev.size != match.b:
             for i in range(prev.b + prev.size, match.b):
                 res1 += ['_' * len(l2[i])]
@@ -36,8 +36,8 @@ def equalize(s1, s2):
     return untokenize(res1), untokenize(res2)
 
 
-def compare(s1, s2):
-    s1, s2 = equalize(s1, s2)
+def compare(s1, s2, color):
+    s1, s2 = equalize(s1, s2, color)
     lft = re.sub(' +', ' ', s1.replace('_', '')).replace('<FILTERED>', '[FILTERED]')
     rgt = re.sub(' +', ' ', s2.replace('_', '')).replace('<FILTERED>', '[FILTERED]')
     return lft, rgt
@@ -45,8 +45,10 @@ def compare(s1, s2):
 
 def main():
     print("Initializing filter.")
-    pfilter = PrivacyFilter()
-    pfilter.initialize(clean_accents=True, nlp_filter=False)
+    pfilter_wl = PrivacyFilter()
+    pfilter_wl.initialize(clean_accents=True, nlp_filter=False, worldlist_filter=True)
+    pfilter_nlp = PrivacyFilter()
+    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, worldlist_filter=False)
 
     print("Running example texts:")
 
@@ -56,17 +58,26 @@ def main():
                   'collapse;text-align:left}</style>\n')
         out.write('<body>\n')
         for filename in os.listdir(folder):
+
             if filename.endswith(".txt"):
                 print(filename)
+
                 out.write('&nbsp\n<table style="width:1000px;">')
-                out.write('<thead>\n<tr><th style="width:50%";>' + filename + '</th><th>' +
-                          pfilter.to_string() + '</th></tr>\n</thead>\n')
+                out.write('<thead>\n<tr><th style="width:25%";>' + filename + '</th><th style="width:25%";><small>' +
+                          pfilter_wl.to_string() + '</small></th>')
+                out.write('<th style="width:25%";></th><th style="width:25%";><small>' + pfilter_nlp.to_string() +
+                          '</small></th></tr>\n</thead>\n')
                 out.write('<tbody>')
                 with open(os.path.join(folder, filename), 'r') as inputfile:
                     for line in inputfile.readlines():
-                        origin, result = compare(line, pfilter.filter(line))
-                        out.write('<tr><td>' + origin + '</td><td>' + result + '</td></tr>')
+                        out.write('<tr>')
+                        origin, result = compare(line, pfilter_wl.filter(line), "red")
+                        out.write('<td>' + origin + '</td><td>' + result + '</td>')
+                        origin, result = compare(line, pfilter_nlp.filter(line), "blue")
+                        out.write('<td>' + origin + '</td><td>' + result + '</td>')
+                        out.write('</tr>')
                 out.write('</tbody>\n</table>\n')
+
         out.write('</body>')
         out.write('</html>')
 
