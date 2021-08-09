@@ -116,7 +116,7 @@ class PrivacyFilter:
         host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
 
         self.url_re = re.compile(
-            r'((?:[a-z0-9.+-]*):?//)?'                                  # scheme is validated separately
+            r'([a-z0-9.+-]*:?//)?'                                       # scheme is validated separately
             r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
             r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
             r'(?::\d{2,5})?'                                            # port
@@ -153,7 +153,7 @@ class PrivacyFilter:
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.]((\d{4}|\d{2}))?",
+            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
             "<DATUM>", text)
         return text
 
@@ -205,8 +205,6 @@ class PrivacyFilter:
         length = len(tagged_words)
         capture_string = ""
 
-        #print("index, length-1, word, tags, word_type, entity_type, is_capture_word, capture_string")
-
         for tagged_word in tagged_words:
             word, tags, word_type, entity_type = tagged_word
             is_capture_word = word_type in self._capture_words
@@ -214,8 +212,6 @@ class PrivacyFilter:
             # If it is a capture word, add it to the string to be tested
             if is_capture_word:
                 capture_string += "{} ".format(word)
-
-            #print(index, length-1, word, tags, word_type, entity_type, is_capture_word, '"', capture_string, '"')
 
             # Check if next word is also forbidden
             if is_capture_word and index + 1 < length:
@@ -256,7 +252,7 @@ class PrivacyFilter:
 
     @staticmethod
     def cleanup_text(result):
-        result = re.sub("\<[A-Z _]+\>", "<FILTERED>", result)
+        result = re.sub("<[A-Z _]+>", "<FILTERED>", result)
         result = re.sub(" ([ ,.:;?!])", "\\1", result)
         result = re.sub(" +", " ", result)                          # remove multiple spaces
         result = re.sub("\n +", "\n", result)                       # remove space after newline
