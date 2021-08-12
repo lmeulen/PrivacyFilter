@@ -1,12 +1,11 @@
 # PrivacyFilter
 Privacy Filter for free text
 
-See also: 
+See also the following articles: 
 - [Remove personal informaton from a text with Python](https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074)
+- [Remove personal informaton from a text with Python - Part II](https://leo-vander-meulen.medium.com/remove-personal-information-from-a-text-with-python-part-ii-ner-2e6529d409a6)
 - [Create a Privacy Filter Web Service with FastAPI and Heroku](https://towardsdatascience.com/create-a-privacy-filter-webservice-with-fastapi-and-heroku-4755ef1ccb25)
 
-on 
-[TowardsDataScience.com](https://towardsdatascience.com).
 
 This repository implements a privacy filter for text. It removes dates, numbers, names, places, streets, medicines 
 and diseases from text. The dataset files are all in Dutch but can be replaced by datasets for other languages.
@@ -83,6 +82,12 @@ executing the filtering.
 The option clean_accents determines if all accents are removed from the text to filter before
 filtering. The option nlp_filter determines whether to run the Spacy model. Using this
 model increases accuracy but reduces performance.
+
+There is also a set of example texts that can be filtered, both with the wordlist and with NER. It results 
+in an HTML file (``results.html``) that compares the original text with the filtered text.
+~~~~
+python RunExamples.py
+~~~~
 
 ## Updating datasets
 
