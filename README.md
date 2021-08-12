@@ -2,8 +2,9 @@
 Privacy Filter for free text
 
 See also: 
-[Remove personal informaton from a text with Python]
-(https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074)
+- [Remove personal informaton from a text with Python](https://towardsdatascience.com/remove-personal-information-from-text-with-python-232cb69cf074)
+- [Create a Privacy Filter Web Service with FastAPI and Heroku](https://towardsdatascience.com/create-a-privacy-filter-webservice-with-fastapi-and-heroku-4755ef1ccb25)
+
 on 
 [TowardsDataScience.com](https://towardsdatascience.com).
 
@@ -45,7 +46,7 @@ They are removed from the text when the NER sees them as names/streets/places.
 
 ## Dependencies
 For using the PrivacyFilter class:
-- Spacy, including nl_core_news_ls
+- Spacy, including nl_core_news_lg
 
 Make sure to run "python -m spacy download nl_core_news_lg" after installing Spacy if you want
 to use the NLP filter. This is not needed when installing dependencies from the requirements.txt with pip.
@@ -67,7 +68,7 @@ The full dependency list is available in the requirements.txt
 ## Example usage
 ~~~~
 pfilter = PrivacyFilter()
-pfilter.initialize(clean_accents=True, nlp_filter=True)
+pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=False)
 
 pfilter.filter("Het is 12-12-2021.", set_numbers_zero=False, remove_accents=True)
 
