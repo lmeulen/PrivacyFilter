@@ -21,6 +21,7 @@ class PrivacyFilter:
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
+        self._nlp_blacklist_entities = ["WORK_OF_ART"]
 
     def to_string(self):
         return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + \
@@ -204,6 +205,7 @@ class PrivacyFilter:
         index = 0
         length = len(tagged_words)
         capture_string = ""
+        captured_entity = ""
 
         for tagged_word in tagged_words:
             word, tags, word_type, entity_type = tagged_word
@@ -212,6 +214,8 @@ class PrivacyFilter:
             # If it is a capture word, add it to the string to be tested
             if is_capture_word:
                 capture_string += "{} ".format(word)
+                if entity_type != "" and entity_type not in self._nlp_blacklist_entities:
+                    captured_entity = entity_type
 
             # Check if next word is also forbidden
             if is_capture_word and index + 1 < length:
@@ -222,10 +226,10 @@ class PrivacyFilter:
 
             # Filter the collected words if they are captured
             if is_capture_word:
-                if entity_type == "":
+                if captured_entity == "" or captured_entity in self._nlp_blacklist_entities:
                     replaced = self.keyword_processor.replace_keywords(capture_string).strip()
                 else:
-                    replaced = "<{}>".format(entity_type)
+                    replaced = "<{}>".format(captured_entity)
 
             elif word_type == "NUM":
                 if set_numbers_zero:
@@ -236,10 +240,11 @@ class PrivacyFilter:
                 replaced = word
 
             # Replace the word, even if it wasn't replaced
-            tagged_words_new.append((replaced, tags, word_type, entity_type))
+            tagged_words_new.append((replaced, tags, word_type, captured_entity))
 
             index += 1
             capture_string = ""
+            captured_entity = ""
 
         # Rebuild the string from the filtered output
         new_string = ""
