@@ -323,6 +323,10 @@ def main():
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
           "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
 
+    zin = " We willen daarnaast collega's, die kunnen programmeren in Python en het ook nog leuk vinden dit script " \
+          "verder mee te ontwikkelen aanmoedigen je aan te sluiten bij dit geweldige initiatief van Leo. Neem in dat " \
+          "geval even contact op met Marinus Dansen. Marinus Dansen, Leo van der Meulen en Michiel van Schaijck."
+
     print(insert_newlines(zin, 120))
 
     start = time.time()
@@ -333,8 +337,8 @@ def main():
 
     start = time.time()
     nr_sentences = 100
-    for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False)
+    # for i in range(0, nr_sentences):
+    zin = pfilter.filter(zin, set_numbers_zero=False)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
