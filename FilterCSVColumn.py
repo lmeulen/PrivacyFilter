@@ -1,10 +1,7 @@
 import argparse
 import os
 import pandas as pd
-from tqdm import tqdm
 from PrivacyFilter import PrivacyFilter
-
-tqdm.pandas()
 
 
 def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';'):
@@ -17,7 +14,7 @@ def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';')
         columnName = df.columns[column]
         print('  Column to filter : ' + columnName)
         print("    Applying filter")
-        df[columnName] = df.progress_apply(lambda row: privacyfilter.filter(str(row[columnName])), axis=1)
+        df[columnName] = df.apply(lambda row: privacyfilter.filter(str(row[columnName])), axis=1)
         print()
 
     print("Saving output file")
