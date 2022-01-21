@@ -18,6 +18,7 @@ class PrivacyFilter:
         self.nlp = None
         self.use_nlp = False
         self.use_wordlist = False
+        self.use_re = False
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
@@ -43,7 +44,7 @@ class PrivacyFilter:
         self.nr_keywords += items_count
         return items
 
-    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False):
+    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False, regular_expressions=True):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
@@ -129,8 +130,9 @@ class PrivacyFilter:
             self.nlp = nl_nlp.load()
             self.use_nlp = True
         self.use_wordlist = wordlist_filter
-
         self.clean_accents = clean_accents
+        self.use_re = regular_expressions
+
         self.initialised = True
 
     @staticmethod
@@ -273,6 +275,7 @@ class PrivacyFilter:
 
         if self.use_nlp:
             text = self.filter_nlp(text)
+        if self.use_re:
             text = self.filter_regular_expressions(text, set_numbers_zero)
 
         if self.use_wordlist:
@@ -323,18 +326,22 @@ def main():
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
           "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
 
+    zin = " We willen daarnaast collega's, die kunnen programmeren in Python en het ook nog leuk vinden dit script " \
+          "verder mee te ontwikkelen aanmoedigen je aan te sluiten bij dit geweldige initiatief van Leo. Neem in dat " \
+          "geval even contact op met Marinus Dansen. Marinus Dansen, Leo van der Meulen en Michiel van Schaijck."
+
     print(insert_newlines(zin, 120))
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize(clean_accents=True, nlp_filter=True)
+    pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
     print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
     print('Number of forbidden words : ' + str(pfilter.nr_keywords))
 
     start = time.time()
     nr_sentences = 100
-    for i in range(0, nr_sentences):
-        zin = pfilter.filter(zin, set_numbers_zero=False)
+    # for i in range(0, nr_sentences):
+    zin = pfilter.filter(zin, set_numbers_zero=False)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()

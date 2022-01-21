@@ -7,7 +7,7 @@ from PrivacyFilter import PrivacyFilter
 def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';'):
     print("Opening input file:")
     print('  Filename         : ' + inputfile)
-    df = pd.read_csv(inputfile, sep=seperator, encoding="ISO-8859-1") #, usecols=[0, 1, 2, 3, 4, 5, 6])
+    df = pd.read_csv(inputfile, sep=seperator, encoding="ISO-8859-1")  # , usecols=[0, 1, 2, 3, 4, 5, 6])
     print('  Rows             : ' + str(len(df)))
 
     for column in columns:
@@ -25,7 +25,7 @@ def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';')
 def main_file(inputfile, outputfile, columns):
     print("Initializing filter")
     pfilter_nlp = PrivacyFilter()
-    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True)
+    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
 
     parse_csv_file(inputfile, outputfile, columns, pfilter_nlp)
 
@@ -33,7 +33,7 @@ def main_file(inputfile, outputfile, columns):
 def main_directory(directory, columns):
     print("Initializing filter")
     pfilter_nlp = PrivacyFilter()
-    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True)
+    pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
 
     if not os.path.isdir(directory):
         print('Please specify a directory as parameter')

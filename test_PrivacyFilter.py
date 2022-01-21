@@ -45,7 +45,7 @@ class PFTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pfilter = PrivacyFilter()
-        cls.pfilter.initialize(clean_accents=True, nlp_filter=False, wordlist_filter=True)
+        cls.pfilter.initialize(clean_accents=True, nlp_filter=False, wordlist_filter=True, regular_expressions=True)
 
 
 class TestAccents(PFTest):
