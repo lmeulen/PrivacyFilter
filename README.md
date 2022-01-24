@@ -67,13 +67,14 @@ The full dependency list is available in the requirements.txt
 ## Example usage
 ~~~~
 pfilter = PrivacyFilter()
-pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=False)
+pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=False,
+                   regular_expressions = True)
 
 pfilter.filter("Het is 12-12-2021.", set_numbers_zero=False, remove_accents=True)
 
 OUTPUT:
 
-Het is <DATUM>. 
+Het is <FILTERED>. 
 ~~~~
 
 The option set_number_zero determines whether numbers are replaced by the tag <NUMBER> or are 
@@ -88,6 +89,37 @@ in an HTML file (``results.html``) that compares the original text with the filt
 ~~~~
 python RunExamples.py
 ~~~~
+
+## Filter Configuration
+It is possible to configure the filter from code (see the example above). This way, it is poassible to enable/
+disable the different filter parts. The default datasets will be used.
+
+Another possibility is to use a yaml file for configration:
+~~~~
+pfilter = PrivacyFilter()
+pfilter.initialize_from_file(filename='filter.yaml')
+~~~~
+
+An example configuration is:
+~~~~
+clean_accents: True
+nlp_filter: True
+wordlist_filter: False
+regular_expressions: True
+
+data_directory: 'datasets'
+firstnames: 'firstnames.csv'
+lastnames: 'lastnames.csv'
+places: 'places.csv'
+streets: 'streets_Nederland.csv'
+diseases: 'diseases.csv'
+medicines: 'medicines.csv'
+nationalities: 'nationalities.csv'
+countries: 'countries.csv'
+~~~~
+The first items specifiy the filters to apply, equal to the configuration from code. Both examples 
+initialize the filter in the same way. The second part specifies the data directory and files that 
+will be used to initialise the word lists. This example uses the same files as default.
 
 ## Updating datasets
 

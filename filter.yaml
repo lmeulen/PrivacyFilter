@@ -1,0 +1,16 @@
+# Filters to apply
+clean_accents: True
+nlp_filter: True
+wordlist_filter: True
+regular_expressions: True
+
+# Datasets to use
+data_directory: 'datasets'
+firstnames: 'firstnames.csv'
+lastnames: 'lastnames.csv'
+places: 'places.csv'
+streets: 'streets_Nederland.csv'
+diseases: 'diseases.csv'
+medicines: 'medicines.csv'
+nationalities: 'nationalities.csv'
+countries: 'countries.csv'

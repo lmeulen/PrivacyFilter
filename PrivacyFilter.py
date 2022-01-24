@@ -1,6 +1,7 @@
 import time
 import re
 import os
+import yaml
 import unicodedata
 import nl_core_news_lg as nl_nlp
 from Processor import KeywordProcessor
@@ -44,25 +45,56 @@ class PrivacyFilter:
         self.nr_keywords += items_count
         return items
 
-    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False, regular_expressions=True):
+    def initialize_from_file(self, filename):
+
+        with open(filename) as file:
+            data = yaml.load(file, Loader=yaml.FullLoader)
+
+        clean_accents = data['clean_accents']
+        nlp_filter = data['nlp_filter']
+        wordlist_filter = data['wordlist_filter']
+        regular_expressions = data['regular_expressions']
+        datadir = data['data_directory']
+
+        fields = {
+            os.path.join(datadir, data['firstnames']): {"replacement": "<NAAM>",
+                                                        "punctuation": None if nlp_filter else self._punctuation},
+            os.path.join(datadir, data['lastnames']): {"replacement": "<NAAM>",
+                                                       "punctuation": None if nlp_filter else self._punctuation},
+            os.path.join(datadir, data['places']): {"replacement": "<PLAATS>", "punctuation": None},
+            os.path.join(datadir, data['streets']): {"replacement": "<ADRES>", "punctuation": None},
+            os.path.join(datadir, data['diseases']): {"replacement": "<AANDOENING>", "punctuation": None},
+            os.path.join(datadir, data['medicines']): {"replacement": "<MEDICIJN>", "punctuation": None},
+            os.path.join(datadir, data['nationalities']): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+            os.path.join(datadir, data['countries']): {"replacement": "<LAND>", "punctuation": None},
+        }
+
+        self.initialize(clean_accents=clean_accents,
+                        nlp_filter=nlp_filter,
+                        wordlist_filter=wordlist_filter,
+                        regular_expressions=regular_expressions,
+                        fields=fields)
+
+    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False,
+                   regular_expressions=True, fields=None):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-
-        fields = {
-            os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>",
-                                                         "punctuation": None if nlp_filter else self._punctuation},
-            os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>",
-                                                        "punctuation": None if nlp_filter else self._punctuation},
-            os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
-            os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
-            os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
-            os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
-            os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
-            os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
-        }
+        if not fields:
+            fields = {
+                os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>",
+                                                             "punctuation": None if nlp_filter else self._punctuation},
+                os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>",
+                                                            "punctuation": None if nlp_filter else self._punctuation},
+                os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+                os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+                os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+                os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+                os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+                os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+            }
 
         for field in fields:
             # If there is a punctuation list, use it.
@@ -326,15 +358,11 @@ def main():
           "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
           "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
 
-    zin = " We willen daarnaast collega's, die kunnen programmeren in Python en het ook nog leuk vinden dit script " \
-          "verder mee te ontwikkelen aanmoedigen je aan te sluiten bij dit geweldige initiatief van Leo. Neem in dat " \
-          "geval even contact op met Marinus Dansen. Marinus Dansen, Leo van der Meulen en Michiel van Schaijck."
-
     print(insert_newlines(zin, 120))
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
+    pfilter.initialize_from_file('filter.yaml')
     print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
     print('Number of forbidden words : ' + str(pfilter.nr_keywords))
 
