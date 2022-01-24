@@ -49,3 +49,4 @@ wasabi==0.8.2
 osmnx==1.1.1
 geopandas==0.9
 lxml==4.6.5
+pyyaml==6.0
