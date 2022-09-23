@@ -3,6 +3,7 @@ clean_accents: True
 nlp_filter: True
 wordlist_filter: True
 regular_expressions: True
+numbers_to_zero: True
 
 # Datasets to use
 data_directory: 'datasets'

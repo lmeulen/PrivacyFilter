@@ -20,6 +20,7 @@ class PrivacyFilter:
         self.use_nlp = False
         self.use_wordlist = False
         self.use_re = False
+        self.numbers_to_zero = False
         ##### CONSTANTS #####
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
@@ -54,6 +55,7 @@ class PrivacyFilter:
         nlp_filter = data['nlp_filter']
         wordlist_filter = data['wordlist_filter']
         regular_expressions = data['regular_expressions']
+        numbers_to_zero = data['numbers_to_zero']
         datadir = data['data_directory']
 
         fields = {
@@ -73,10 +75,11 @@ class PrivacyFilter:
                         nlp_filter=nlp_filter,
                         wordlist_filter=wordlist_filter,
                         regular_expressions=regular_expressions,
+                        numbers_to_zero=numbers_to_zero,
                         fields=fields)
 
     def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False,
-                   regular_expressions=True, fields=None):
+                   regular_expressions=True, numbers_to_zero=False, fields=None):
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
@@ -164,12 +167,13 @@ class PrivacyFilter:
         self.use_wordlist = wordlist_filter
         self.clean_accents = clean_accents
         self.use_re = regular_expressions
+        self.numbers_to_zero = numbers_to_zero
 
         self.initialised = True
 
     @staticmethod
-    def remove_numbers(text, set_zero=True):
-        if set_zero:
+    def remove_numbers(text, numbers_to_zero):
+        if numbers_to_zero:
             return re.sub('\d', '0', text).strip()
         else:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
@@ -217,16 +221,16 @@ class PrivacyFilter:
         text = self.keyword_processor_names.replace_keywords(text)
         return text
 
-    def filter_regular_expressions(self, text, set_numbers_zero=True):
+    def filter_regular_expressions(self, text):
         text = self.remove_url(text)
         text = self.remove_dates(text)
         text = self.remove_times(text)
         text = self.remove_email(text)
         text = self.remove_postal_codes(text)
-        text = self.remove_numbers(text, set_numbers_zero)
+        text = self.remove_numbers(text, self.numbers_to_zero)
         return text
 
-    def filter_nlp(self, text, set_numbers_zero=False):
+    def filter_nlp(self, text):
         if not self.nlp:
             self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
 
@@ -266,7 +270,7 @@ class PrivacyFilter:
                     replaced = "<{}>".format(captured_entity)
 
             elif word_type == "NUM":
-                if set_numbers_zero:
+                if self.numbers_to_zero:
                     replaced = "0"
                 else:
                     replaced = "<GETAL>"
@@ -298,26 +302,26 @@ class PrivacyFilter:
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
         return result.strip()
 
-    def filter(self, text, set_numbers_zero=False):
+    def filter(self, text):
         if not self.initialised:
             self.initialize()
-
+        text = str(text)
         if self.clean_accents:
             text = self.remove_accents(text)
 
         if self.use_nlp:
             text = self.filter_nlp(text)
         if self.use_re:
-            text = self.filter_regular_expressions(text, set_numbers_zero)
+            text = self.filter_regular_expressions(text)
 
         if self.use_wordlist:
-            text = self.filter_static(text, set_numbers_zero)
+            text = self.filter_static(text)
 
         return self.cleanup_text(text)
 
-    def filter_static(self, text, set_numbers_zero):
+    def filter_static(self, text):
         text = " " + text + " "
-        text = self.filter_regular_expressions(text, set_numbers_zero)
+        text = self.filter_regular_expressions(text)
         text = self.filter_keyword_processors(text)
         return text
 
@@ -368,12 +372,12 @@ def main():
 
     start = time.time()
     nr_sentences = 100
-    # for i in range(0, nr_sentences):
-    zin = pfilter.filter(zin, set_numbers_zero=False)
+    for i in range(0, nr_sentences):
+        zin2 = pfilter.filter(zin)
 
     print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
     print()
-    print(insert_newlines(zin, 120))
+    print(insert_newlines(zin2, 120))
 
 
 if __name__ == "__main__":
