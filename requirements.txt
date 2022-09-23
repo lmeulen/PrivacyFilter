@@ -20,7 +20,7 @@ MarkupSafe==2.0.1
 munch==2.5.0
 murmurhash==1.0.5
 nl-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/nl_core_news_lg-3.0.0/nl_core_news_lg-3.0.0-py3-none-any.whl
-numpy==1.21.0
+numpy==1.22.0
 packaging==20.9
 pandas==1.1.4
 pathy==0.6.0
