@@ -49,7 +49,7 @@ class PFTestNLP(unittest.TestCase):
 class TestNLP(PFTestNLP):
     def test_nlp(self):
         for sample in file_to_samples("nlp.txt"):
-            run_test_function_with_data(self, self.pfilter.filter, sample, set_numbers_zero=False)
+            run_test_function_with_data(self, self.pfilter.filter, sample)
 
 
 if __name__ == '__main__':
