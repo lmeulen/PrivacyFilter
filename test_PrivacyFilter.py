@@ -77,11 +77,11 @@ class TestRegex(PFTest):
 
     def test_numbers(self):
         for sample in file_to_samples("numbers.txt"):
-            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=False)
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, numbers_to_zero=False)
 
     def test_numbers_set_zero_true(self):
         for sample in file_to_samples("numbers_zeroes.txt"):
-            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, set_zero=True)
+            run_test_function_with_data(self, self.pfilter.remove_numbers, sample, numbers_to_zero=True)
 
 
 class TestKeywordProcessor(PFTest):
@@ -113,7 +113,7 @@ class TestKeywordProcessor(PFTest):
 class TestFilter(PFTest):
     def test_filter(self):
         for sample in file_to_samples("filter.txt"):
-            run_test_function_with_data(self, self.pfilter.filter, sample, set_numbers_zero=False)
+            run_test_function_with_data(self, self.pfilter.filter, sample)
 
 
 if __name__ == '__main__':
