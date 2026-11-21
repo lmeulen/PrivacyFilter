@@ -37,20 +37,20 @@ Legacy requirement files remain available: `requirements.txt`, `requirements-upd
 
 ## Library usage
 
-```python
-from PrivacyFilter import PrivacyFilter
-
-pfilter = PrivacyFilter()
-pfilter.initialize(
-    clean_accents=True,
-    nlp_filter=True,
-    wordlist_filter=False,
-    regular_expressions=True,
-)
-
-print(pfilter.filter("Het is 12-12-2021."))
-# Het is <DATUM>.
+```pycon
+>>> from PrivacyFilter import PrivacyFilter
+>>> pfilter = PrivacyFilter()
+>>> pfilter.initialize(
+...     clean_accents=True,
+...     nlp_filter=False,
+...     wordlist_filter=False,
+...     regular_expressions=True,
+... )
+>>> pfilter.filter("Het is 12-12-2021.")
+'Het is <FILTERED>.'
 ```
+
+`filter()` normalizes all replacement labels to `<FILTERED>`. Lower-level rule methods, such as `remove_dates()`, retain semantic labels such as `<DATUM>`.
 
 Default datasets ship with installed package. To use custom files, call `initialize_from_file("filter.yaml")`.
 
