@@ -4,7 +4,7 @@ import re
 from privacyfilter import PrivacyFilter
 
 
-def file_to_samples(file, directory="test_samples", delimiter="~"):
+def file_to_samples(file, directory="test/samples", delimiter="~"):
     with open("{dir}/{file}".format(dir=directory, file=file)) as f:
         for line in f.readlines():
             line = line.rstrip()

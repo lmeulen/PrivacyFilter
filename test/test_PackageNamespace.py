@@ -3,9 +3,14 @@ import sys
 import unittest
 import warnings
 from importlib.resources import files
+from pathlib import Path
 
 
 class TestPackageNamespace(unittest.TestCase):
+    def test_test_modules_and_fixtures_live_under_test_directory(self):
+        self.assertFalse(list(Path(".").glob("test_*.py")))
+        self.assertTrue((Path("test") / "samples" / "nlp.txt").is_file())
+
     def test_supported_public_api_and_packaged_data(self):
         import privacyfilter
 

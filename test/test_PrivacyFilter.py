@@ -7,7 +7,7 @@ from unittest.mock import patch
 from privacyfilter import PrivacyFilter, __version__
 
 
-def file_to_samples(file, directory="test_samples", delimiter="~"):
+def file_to_samples(file, directory="test/samples", delimiter="~"):
     with open("{dir}/{file}".format(dir=directory, file=file), encoding="utf-8") as f:
         for line in f.readlines():
             line = line.rstrip()

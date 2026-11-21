@@ -76,7 +76,7 @@ include = [
 "RunExamples.py" = "RunExamples.py"
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+testpaths = ["test"]
 python_files = ["test_*.py"]
 pythonpath = ["src"]
 filterwarnings = ["error"]
