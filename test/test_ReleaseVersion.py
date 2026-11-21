@@ -35,17 +35,58 @@ class TestReleaseVersion(unittest.TestCase):
                 text=True,
             )
 
-        self.assertIn("matches 2 distribution artifact", result.stdout)
+        self.assertIn("matches 2 version source", result.stdout)
 
-    def test_release_validator_rejects_mismatched_tag(self):
-        result = subprocess.run(
-            [sys.executable, "scripts/verify_release_version.py", "2.0.0", "dist/privacyfilter-2.0.0.tar.gz"],
-            capture_output=True,
-            text=True,
-        )
+    def test_release_validator_accepts_matching_source_version_before_build(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            version_file = Path(temporary_directory) / "_version.py"
+            version_file.write_text('__version__ = "2.0.0rc1"\n', encoding="utf-8")
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_release_version.py",
+                    "v2.0.0rc1",
+                    "--version-file",
+                    str(version_file),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
-        self.assertNotEqual(result.returncode, 0)
-        self.assertIn("tag must use vX.Y.Z format", result.stderr)
+        self.assertIn("matches 1 version source", result.stdout)
+
+    def test_release_validator_rejects_mismatched_or_invalid_tag_before_build(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            version_file = Path(temporary_directory) / "_version.py"
+            version_file.write_text('__version__ = "2.0.0"\n', encoding="utf-8")
+            mismatch = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_release_version.py",
+                    "v2.0.1",
+                    "--version-file",
+                    str(version_file),
+                ],
+                capture_output=True,
+                text=True,
+            )
+            invalid = subprocess.run(
+                [
+                    sys.executable,
+                    "scripts/verify_release_version.py",
+                    "v2.0.0.post1",
+                    "--version-file",
+                    str(version_file),
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+        self.assertNotEqual(mismatch.returncode, 0)
+        self.assertIn("does not match", mismatch.stderr)
+        self.assertNotEqual(invalid.returncode, 0)
+        self.assertIn("vX.Y.ZrcN/aN/bN", invalid.stderr)
 
 
 if __name__ == "__main__":

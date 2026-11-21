@@ -4,8 +4,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## Unreleased
 
+### Security
+
+- Escaped dynamic example-report content to prevent HTML/script injection in generated HTML.
+
 ### Changed
 
+- Release workflow validates tag against source version before dependency installation or distribution build.
 - Removed deprecated flat module compatibility shims and legacy requirements files. Use `privacyfilter.*` imports/module commands and package extras instead.
 - Removed deprecated `seperator` keyword alias; use `separator`.
 

@@ -13,6 +13,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - name: Verify release tag matches source version
+        run: >-
+          uv run --no-sync python scripts/verify_release_version.py "${GITHUB_REF_NAME}"
+          --version-file src/privacyfilter/_version.py
       - name: Install and verify locked release
         run: |
           uv sync --extra dev --extra updater --locked
@@ -22,7 +26,9 @@ jobs:
       - name: Build distribution
         run: uv build
       - name: Verify tag matches distribution version
-        run: uv run python scripts/verify_release_version.py "${GITHUB_REF_NAME}" dist/*
+        run: >-
+          uv run python scripts/verify_release_version.py "${GITHUB_REF_NAME}" dist/*
+          --version-file src/privacyfilter/_version.py
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}

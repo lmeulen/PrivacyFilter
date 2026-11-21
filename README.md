@@ -144,7 +144,7 @@ python -m ruff check . --select E9,F63,F7,F82
 python -m pip_audit --progress-spinner off
 ```
 
-See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md). After release checks, tag the release as `vX.Y.Z`; GitHub Actions verifies tag matches package version, builds distribution, and creates GitHub Release.
+See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md). After release checks, tag a final release as `vX.Y.Z`, or prerelease as `vX.Y.ZaN`, `vX.Y.ZbN`, or `vX.Y.ZrcN`. Tag version must exactly match `src/privacyfilter/_version.py`; GitHub Actions checks it before dependency installation/building, verifies built artifacts again, then creates GitHub Release. Local versions, post releases, and arbitrary `v*` tags are rejected.
 
 ## License
 
