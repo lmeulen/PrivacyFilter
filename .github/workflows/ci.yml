@@ -1,42 +1,36 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
 name: CI
 
 on:
   push:
-    branches: [ master, development]
+    branches: [master, development]
   pull_request:
-    branches: [ master, development]
+    branches: [master, development]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8
-        pip install -r requirements.txt
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test static filters
-      if: always()
-      run: |
-        python -m unittest test_PrivacyFilter.py
-# Don't run the NLP unittest as the NLP isn't developed enough.
-    - name: Test NLP filters
-      if: always()
-      run: |
-        python -m unittest test_PrivacyFilter_NLP.py
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install locked dependencies
+        run: uv sync --extra dev --extra updater --locked
+      - name: Check dependencies
+        run: uv run python -m pip check
+      - name: Audit dependencies
+        if: runner.os == 'Linux'
+        run: uv run pip-audit --progress-spinner off
+      - name: Lint for syntax and undefined names
+        run: uv run ruff check . --select E9,F63,F7,F82
+      - name: Run tests
+        run: uv run pytest -q
+
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Verify lock file
+        run: uv lock --check

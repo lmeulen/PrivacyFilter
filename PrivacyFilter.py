@@ -3,8 +3,13 @@ import re
 import os
 import yaml
 import unicodedata
-import nl_core_news_lg as nl_nlp
+from importlib.resources import files
+
 from Processor import KeywordProcessor
+
+__version__ = "2.0.0"
+
+DEFAULT_DATA_DIRECTORY = files("privacyfilter_data")
 
 
 class PrivacyFilter:
@@ -16,6 +21,7 @@ class PrivacyFilter:
         self.initialised = False
         self.clean_accents = True
         self.nr_keywords = 0
+        self.known_keywords = {}
         self.nlp = None
         self.use_nlp = False
         self.use_wordlist = False
@@ -25,6 +31,7 @@ class PrivacyFilter:
         self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
         self._capture_words = ["PROPN", "NOUN"]
         self._nlp_blacklist_entities = ["WORK_OF_ART"]
+        self._nlp_name_stopwords = {"Er"}
 
     def to_string(self):
         return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + \
@@ -87,22 +94,23 @@ class PrivacyFilter:
         # implementation of a token based algorithm.
         if not fields:
             fields = {
-                os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>",
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'firstnames.csv'): {"replacement": "<NAAM>",
                                                              "punctuation": None if nlp_filter else self._punctuation},
-                os.path.join('datasets', 'lastnames.csv'): {"replacement": "<NAAM>",
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'lastnames.csv'): {"replacement": "<NAAM>",
                                                             "punctuation": None if nlp_filter else self._punctuation},
-                os.path.join('datasets', 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
-                os.path.join('datasets', 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
-                os.path.join('datasets', 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
-                os.path.join('datasets', 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
-                os.path.join('datasets', 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
-                os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
             }
 
         for field in fields:
             # If there is a punctuation list, use it.
             if fields[field]["punctuation"] is not None:
                 for name in self.file_to_list(field):
+                    self.known_keywords[name.casefold()] = fields[field]["replacement"]
                     for c in self._punctuation:
                         self.keyword_processor.add_keyword(
                             "{n}{c}".format(n=name, c=c),
@@ -110,13 +118,20 @@ class PrivacyFilter:
                         )
             else:
                 for name in self.file_to_list(field):
+                    self.known_keywords[name.casefold()] = fields[field]["replacement"]
                     self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
+        with open(os.path.join(DEFAULT_DATA_DIRECTORY, 'firstnames.csv'), encoding="utf-8") as file:
+            next(file)
+            firstnames = [line.rstrip() for line in file]
+        with open(os.path.join(DEFAULT_DATA_DIRECTORY, 'lastnames.csv'), encoding="utf-8") as file:
+            next(file)
+            lastnames = [line.rstrip() for line in file]
         if not nlp_filter:
-            for name in self.file_to_list(os.path.join('datasets', 'firstnames.csv')):
+            for name in firstnames:
                 self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
-            for name in self.file_to_list(os.path.join('datasets', 'lastnames.csv')):
+            for name in lastnames:
                 self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression
@@ -162,7 +177,9 @@ class PrivacyFilter:
         )
 
         if nlp_filter:
-            self.nlp = nl_nlp.load()
+            import spacy
+
+            self.nlp = spacy.load("nl_core_news_lg")
             self.use_nlp = True
         self.use_wordlist = wordlist_filter
         self.clean_accents = clean_accents
@@ -174,32 +191,32 @@ class PrivacyFilter:
     @staticmethod
     def remove_numbers(text, numbers_to_zero):
         if numbers_to_zero:
-            return re.sub('\d', '0', text).strip()
+            return re.sub(r'\d', '0', text).strip()
         else:
             return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
 
     @staticmethod
     def remove_times(text):
-        return re.sub('(\d{1,2})[.:](\d{1,2})?([ ]?(am|pm|AM|PM))?', '<TIJD>', text)
+        return re.sub(r'(\d{1,2})[.:](\d{1,2})?([ ]?(am|pm|AM|PM))?', '<TIJD>', text)
 
     @staticmethod
     def remove_dates(text):
-        text = re.sub("\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
+        text = re.sub(r"\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            "([- /.]{,2}(\d{4}|\d{2}))?)",
+            r"(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
+            r"([- /.]{,2}(\d{4}|\d{2}))?)",
             "<DATUM>", text)
 
         text = re.sub(
-            "(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
+            r"(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
             "<DATUM>", text)
         return text
 
     @staticmethod
     def remove_email(text):
-        return re.sub("(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))"
-                      "(?![^<]*>)",
+        return re.sub(r"(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))"
+                      r"(?![^<]*>)",
                       "<EMAIL>",
                       text)
 
@@ -252,7 +269,15 @@ class PrivacyFilter:
             # If it is a capture word, add it to the string to be tested
             if is_capture_word:
                 capture_string += "{} ".format(word)
-                if entity_type != "" and entity_type not in self._nlp_blacklist_entities:
+                if (
+                    entity_type != ""
+                    and entity_type not in self._nlp_blacklist_entities
+                    and (
+                        word_type == "PROPN"
+                        or word[:1].isupper()
+                        or entity_type in {"DATE", "TIME"}
+                    )
+                ):
                     captured_entity = entity_type
 
             # Check if next word is also forbidden
@@ -265,7 +290,9 @@ class PrivacyFilter:
             # Filter the collected words if they are captured
             if is_capture_word:
                 if captured_entity == "" or captured_entity in self._nlp_blacklist_entities:
-                    replaced = self.keyword_processor.replace_keywords(capture_string).strip()
+                    replaced = capture_string.strip()
+                    if capture_string[:1].isupper():
+                        replaced = self.known_keywords.get(replaced.casefold(), replaced)
                 else:
                     replaced = "<{}>".format(captured_entity)
 
@@ -275,7 +302,12 @@ class PrivacyFilter:
                 else:
                     replaced = "<GETAL>"
             else:
-                replaced = word
+                # Fall back to curated lists when NLP assigns an unexpected POS.
+                # Model upgrades can classify proper names as AUX or other types.
+                if word[:1].isupper() and word not in self._nlp_name_stopwords:
+                    replaced = self.known_keywords.get(word.casefold(), word)
+                else:
+                    replaced = word
 
             # Replace the word, even if it wasn't replaced
             tagged_words_new.append((replaced, tags, word_type, captured_entity))
@@ -302,14 +334,15 @@ class PrivacyFilter:
         result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
         return result.strip()
 
-    def filter(self, text):
+    def filter(self, text, nlp_filter=None):
         if not self.initialised:
             self.initialize()
         text = str(text)
         if self.clean_accents:
             text = self.remove_accents(text)
 
-        if self.use_nlp:
+        use_nlp = self.use_nlp if nlp_filter is None else nlp_filter
+        if use_nlp:
             text = self.filter_nlp(text)
         if self.use_re:
             text = self.filter_regular_expressions(text)

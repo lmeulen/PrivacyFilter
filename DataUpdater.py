@@ -21,8 +21,8 @@ def remove_accents(text):
 
 
 def filter_and_save(df, column, filename, min_length=1, filter_verbs=True):
-    df = df[df[column].str.len() > min_length].drop_duplicates()
-    df[column] = df.apply(lambda x: remove_accents(x[column]), axis=1)
+    df = df[df[column].str.len() > min_length].drop_duplicates().copy()
+    df[column] = df[column].map(remove_accents)
     if filter_verbs:
         df = df[~df[column].isin(verbs)]
     df = df.sort_values(column)
@@ -72,11 +72,11 @@ def update_streetnames(download=True, min_length=6):
                      'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
             print(name)
             graph = ox.graph_from_place(name + ", Netherlands", network_type="drive")
-            gdf_nodes, gdf_edges = ox.graph_to_gdfs(graph)
+            gdf_edges = ox.graph_to_gdfs(graph, nodes=False)
             names = gdf_edges[['name']].reset_index().drop(columns={'u', 'v', 'key'})
             names.name = names.name.astype('str')
             names = names.drop_duplicates()
-            names = names[~names.name.str.contains('\[')]
+            names = names[~names.name.str.contains(r'\[')]
             names.to_csv(join('datasets', 'RAW_streets', 'streets_' + name + '.csv'), index=False)
     lst = []
     for name in ['Gelderland', 'Overijssel', 'Drenthe', 'Groningen', 'Friesland', 'Zeeland', 'Utrecht',
@@ -209,10 +209,10 @@ def update_countries():
             cells = row.find_all("td")
             if len(cells) == 4:
                 naam = cells[0].text.strip()
-                naam = re.sub("\[.*", "", naam)
+                naam = re.sub(r"\[.*", "", naam)
                 lst.append(naam)
                 naam = cells[1].text.strip()
-                naam = re.sub("\(.*", "", naam)
+                naam = re.sub(r"\(.*", "", naam)
                 lst.append(naam)
                 lst.append(cells[3].text.strip().split(":")[1].split('/')[0].strip())
     countries = pd.DataFrame(lst, columns=['land'])

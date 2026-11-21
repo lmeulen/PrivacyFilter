@@ -1,0 +1,5 @@
+-r requirements-updater.txt
+httpx>=0.28,<1
+pip-audit>=2.9,<3
+pytest>=8.3,<10
+ruff>=0.9,<1

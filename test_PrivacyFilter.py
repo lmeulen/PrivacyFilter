@@ -2,7 +2,7 @@ import re
 import unittest
 import re
 
-from PrivacyFilter import PrivacyFilter
+from PrivacyFilter import PrivacyFilter, __version__
 
 
 def file_to_samples(file, directory="test_samples", delimiter="~"):
@@ -39,6 +39,17 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
                 output=result
             )
     )
+
+
+class TestReleaseMetadata(unittest.TestCase):
+    def test_version(self):
+        self.assertEqual(__version__, "2.0.0")
+
+    def test_default_data_is_packaged(self):
+        pfilter = PrivacyFilter()
+        pfilter.initialize(nlp_filter=False, wordlist_filter=True)
+
+        self.assertEqual(pfilter.filter("Arnhem"), "<FILTERED>")
 
 
 class PFTest(unittest.TestCase):
