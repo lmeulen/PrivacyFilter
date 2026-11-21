@@ -6,6 +6,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- Refreshed contribution guide with current branch/PR policy, locked `uv` setup, validation commands, warnings policy, and release/tag workflow.
 - Split configuration/data loading, regular-expression formatting rules, and spaCy NLP interpretation into focused typed components behind the stable `PrivacyFilter` API.
 - Corrected `PrivacyFilter.to_string()` class-name typo and added public-path type annotations.
 - Enabled maintained Ruff lint rules and formatting checks for refactored modules.

@@ -1,54 +1,61 @@
 # Contributing
-Thanks for your interest in the project! 
 
-If you find a bug or want to propose a new feature open an issue. If you have written some code that should be merged open a pull request describing your changes 
-and why it should be merged. If you have a question or want to discuss something, feel free to contact any of the contributors.
+Thanks for improving PrivacyFilter. Report bugs and proposals in a GitHub issue before substantial work. Keep each change focused on one issue and include regression coverage for behavior changes.
 
-## Git branching model
+## Branches and pull requests
 
-The branching model is based on the branching model described in the post [A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/). 
+`master` is default and release branch. It must remain releasable. Create a short-lived branch from current `master` for a contribution, then open a pull request targeting `master`. Do not commit generated caches, local environments, credentials, or unreviewed dataset downloads.
 
-### The main branches
+The repository also has a `development` branch for integration work; CI runs for both `master` and `development`. It is not required as an intermediate branch for ordinary contributions. A maintainer decides merge timing and release eligibility.
 
-The central repository holds three types of branches:
+Before requesting review:
 
-* master 
-* development
-* feature branches
+- Describe problem, approach, and validation in pull request.
+- Link issue with `Fixes #<number>` when applicable.
+- Update documentation and changelog when user-visible behavior, operations, or security posture changes.
+- Add or update tests for changed behavior.
+- Keep commits focused; rebase or merge latest `master` when needed.
 
-#### The master branch 
-We consider _origin/master_ to be the main branch where the source code of HEAD always reflects a production-ready state.
+## Development setup
 
-* safe to merge into the development
-* contains only reviewed code
+Python 3.12+ required. [uv](https://docs.astral.sh/uv/) creates and manages project environment from committed lock file:
 
-#### The development branch
-The development branch serves as a working branch where new features can be collected and tested before they are merged into the master.
+```bash
+uv sync --extra dev --extra updater --locked
+```
 
-* contains finished changes 
-* successfull unit tests
+Use `uv run` for project commands. Runtime dependencies are default; `dev` provides test/lint/audit tools, and `updater` provides dataset refresh dependencies. Do not manually edit `uv.lock`; update dependencies through `pyproject.toml` and regenerate lock deliberately.
 
+## Required checks
 
-#### Merging strategy and feature branches
-Feature branches are used to develop and integrate new code and integrate into the development branch. 
+Run same checks as CI before pull request:
 
-Feature branches should be used for a single change and should ideally correspond to a single issue.
-~~Once the code on the branch is ready for review, a pull request into development should be opened.~~
+```bash
+uv run python -m pip check
+uv run pip-audit --progress-spinner off
+uv run ruff check .
+uv run ruff format --check src/privacyfilter/configuration.py \
+  src/privacyfilter/rules.py src/privacyfilter/nlp.py src/privacyfilter/core.py \
+  test/test_Components.py
+uv run pytest -q
+uv lock --check
+```
 
-**Feature branches**
+Pytest treats warnings as errors. Fix new warnings instead of suppressing them. Ruff checks maintained lint rules project-wide; formatter checks currently cover refactored modules while older files are incrementally formatted.
 
-* correspond to a single issue
-* merged into development upon succesfull unit tests
-* ~~merged into developmentthrough a pull request~~
+Dataset changes also require review of data sources, licenses, and privacy implications. Run updater only after installing `updater` extra; see README and `THIRD_PARTY_NOTICES.md`.
 
-**Pull request**
+## Release process
 
-If needed, a pull request can be created.
-In order for the pull request to be merged, the following conditions must be met:
+1. Update only `src/privacyfilter/_version.py` for package version.
+2. Run required checks above, then build locally:
 
-* unittests passed
-* ~~a positive review is required~~
-* follows the PEP8 style guide 
-* has tests for the code
+   ```bash
+   uv build
+   uv run python scripts/verify_release_version.py vX.Y.Z dist/* \
+     --version-file src/privacyfilter/_version.py
+   ```
 
-Tests are run automatically.
+3. Commit version/changelog changes, merge to `master`, then create matching tag.
+
+Release tags must exactly match source version: final `vX.Y.Z`, or prerelease `vX.Y.ZaN`, `vX.Y.ZbN`, or `vX.Y.ZrcN`. Local versions, post releases, and arbitrary `v*` tags are rejected. Release workflow validates tag against source before dependency installation/building, revalidates built artifacts, then creates GitHub Release.
