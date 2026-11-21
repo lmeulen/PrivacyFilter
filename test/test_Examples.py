@@ -26,7 +26,7 @@ class TestExamples(unittest.TestCase):
             temporary_path = Path(temporary_directory)
             examples_directory = temporary_path / "examples"
             examples_directory.mkdir()
-            filename = '<img src=x onerror=alert(1)>.txt'
+            filename = "untrusted & filename.txt"
             (examples_directory / filename).write_text('<script>alert(1)</script>\n', encoding="utf-8")
             output_file = temporary_path / "results.html"
 
@@ -40,7 +40,7 @@ class TestExamples(unittest.TestCase):
                 examples.main()
 
             output = output_file.read_text(encoding="utf-8")
-            self.assertIn("&lt;img src=x onerror=alert(1)&gt;.txt", output)
+            self.assertIn("untrusted &amp; filename.txt", output)
             self.assertIn("&lt;script&gt;alert(1)&lt;/script&gt;", output)
             self.assertIn("&lt;script&gt;alert(2)&lt;/script&gt;", output)
             self.assertIn("&lt;script&gt;alert(3)&lt;/script&gt;", output)
