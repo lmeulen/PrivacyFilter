@@ -1420,13 +1420,15 @@ source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "nl-core-news-lg" },
-    { name = "pyopenssl" },
     { name = "pyyaml" },
     { name = "spacy" },
     { name = "uvicorn" },
 ]
 
 [package.optional-dependencies]
+certificates = [
+    { name = "pyopenssl" },
+]
 dev = [
     { name = "httpx2" },
     { name = "pip-audit" },
@@ -1457,7 +1459,7 @@ requires-dist = [
     { name = "osmnx", marker = "extra == 'updater'", specifier = ">=2.0,<3" },
     { name = "pandas", marker = "extra == 'updater'", specifier = ">=2.2,<3" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.9,<3" },
-    { name = "pyopenssl", specifier = ">=25.0,<27" },
+    { name = "pyopenssl", marker = "extra == 'certificates'", specifier = ">=25.0,<27" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3,<10" },
     { name = "pyyaml", specifier = ">=6.0.2,<7" },
     { name = "requests", marker = "extra == 'updater'", specifier = ">=2.32,<3" },
@@ -1465,7 +1467,7 @@ requires-dist = [
     { name = "spacy", specifier = ">=3.8,<3.9" },
     { name = "uvicorn", specifier = ">=0.34,<1" },
 ]
-provides-extras = ["dev", "updater"]
+provides-extras = ["certificates", "dev", "updater"]
 
 [[package]]
 name = "py-serializable"

@@ -6,6 +6,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- Moved pyOpenSSL from core runtime dependencies to optional `certificates` extra used only by self-signed development certificate helper.
 - Refreshed contribution guide with current branch/PR policy, locked `uv` setup, validation commands, warnings policy, and release/tag workflow.
 - Split configuration/data loading, regular-expression formatting rules, and spaCy NLP interpretation into focused typed components behind the stable `PrivacyFilter` API.
 - Corrected `PrivacyFilter.to_string()` class-name typo and added public-path type annotations.

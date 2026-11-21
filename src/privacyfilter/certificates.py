@@ -1,4 +1,15 @@
-from OpenSSL import crypto
+"""Self-signed development certificate helper.
+
+Install with ``pip install 'privacyfilter[certificates]'`` before importing this module.
+"""
+
+try:
+    from OpenSSL import crypto
+except ImportError as error:  # pragma: no cover - depends on optional installation
+    raise ImportError(
+        "Certificate support requires optional dependency. "
+        "Install with: pip install 'privacyfilter[certificates]'"
+    ) from error
 
 
 def generate_certificate(

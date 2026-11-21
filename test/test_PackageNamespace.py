@@ -17,6 +17,16 @@ class TestPackageNamespace(unittest.TestCase):
         self.assertTrue(callable(privacyfilter.PIIFilter))
         self.assertTrue((files("privacyfilter.data") / "firstnames.csv").is_file())
 
+    def test_openssl_is_only_certificate_extra(self):
+        metadata = Path("pyproject.toml").read_text(encoding="utf-8")
+        runtime_dependencies = metadata.split("[project.optional-dependencies]", maxsplit=1)[0]
+        certificate_extra = metadata.split("[project.optional-dependencies]", maxsplit=1)[1].split(
+            "updater =", maxsplit=1
+        )[0]
+
+        self.assertNotIn("pyopenssl", runtime_dependencies.lower())
+        self.assertIn("pyopenssl", certificate_extra.lower())
+
     def test_legacy_flat_modules_are_not_importable(self):
         for module in (
             "DataUpdater",
