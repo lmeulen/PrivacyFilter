@@ -1,3 +1,4 @@
+import inspect
 import unittest
 
 from fastapi.testclient import TestClient
@@ -15,6 +16,11 @@ class TestPrivacyFilterAPI(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.client_context.__exit__(None, None, None)
+
+    def test_filter_endpoint_is_synchronous_for_threadpool_execution(self):
+        route = next(route for route in privacyFilterApp.routes if route.path == "/filter")
+
+        self.assertFalse(inspect.iscoroutinefunction(route.endpoint))
 
     def test_root(self):
         response = self.client.get("/")

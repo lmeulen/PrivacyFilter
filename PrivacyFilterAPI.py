@@ -45,7 +45,7 @@ async def health(request: Request):
 
 
 @privacyFilterApp.post("/filter")
-async def filtertext(item: Parameter, request: Request):
+def filtertext(item: Parameter, request: Request):
     if hasattr(request.app.state, "startup_error"):
         raise HTTPException(status_code=503, detail=request.app.state.startup_error)
 

@@ -76,7 +76,7 @@ curl http://127.0.0.1:8000/filter \
   -d '{"text":"Jan woont in Arnhem op 12-12-2021.","use_nlp":true}'
 ```
 
-NLP model loads during application startup. Startup can take time and needs substantial memory. Run behind a TLS-terminating reverse proxy in production; do not expose plaintext traffic publicly. Generate certificates with `GenerateCertificate.py` only when configuring Uvicorn TLS explicitly.
+NLP model loads during application startup. Startup can take time and needs substantial memory. Filtering runs in FastAPI's threadpool, so NLP work does not block server event loop. Threadpool capacity remains finite: benchmark realistic request sizes, cap request concurrency at reverse proxy, and use multiple worker processes only after sizing memory for one spaCy model per worker. Run behind a TLS-terminating reverse proxy in production; do not expose plaintext traffic publicly. Generate certificates with `GenerateCertificate.py` only when configuring Uvicorn TLS explicitly.
 
 ## Dataset updater
 
