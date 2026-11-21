@@ -1416,7 +1416,6 @@ wheels = [
 
 [[package]]
 name = "privacyfilter"
-version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },
@@ -1466,7 +1465,7 @@ requires-dist = [
     { name = "spacy", specifier = ">=3.8,<3.9" },
     { name = "uvicorn", specifier = ">=0.34,<1" },
 ]
-provides-extras = ["updater", "dev"]
+provides-extras = ["dev", "updater"]
 
 [[package]]
 name = "py-serializable"

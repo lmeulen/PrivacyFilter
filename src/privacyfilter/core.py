@@ -5,9 +5,8 @@ import yaml
 import unicodedata
 from importlib.resources import files
 
+from ._version import __version__
 from .processor import KeywordProcessor
-
-__version__ = "2.0.0"
 
 DEFAULT_DATA_DIRECTORY = files("privacyfilter.data")
 

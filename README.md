@@ -1,4 +1,4 @@
-# PrivacyFilter 2.0.0
+# PrivacyFilter
 
 Dutch free-text privacy filter. It replaces URLs, emails, dates, times, Dutch postal codes, numbers, and configured names, places, streets, medicines, diseases, nationalities, and countries. Optional spaCy NER improves detection.
 
@@ -144,7 +144,7 @@ python -m ruff check . --select E9,F63,F7,F82
 python -m pip_audit --progress-spinner off
 ```
 
-See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md). Tag `v2.0.0` after release checks; GitHub Actions builds distribution and creates GitHub Release.
+See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md). After release checks, tag the release as `vX.Y.Z`; GitHub Actions verifies tag matches package version, builds distribution, and creates GitHub Release.
 
 ## License
 
