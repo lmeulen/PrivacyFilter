@@ -10,7 +10,10 @@ import requests
 import unicodedata
 import string
 from bs4 import BeautifulSoup
-from os.path import join
+from pathlib import Path
+
+DATA_DIRECTORY = Path(__file__).with_name("privacyfilter_data")
+DOWNLOAD_DIRECTORY = Path(__file__).with_name("data-cache")
 
 verbs = []
 
@@ -26,7 +29,8 @@ def filter_and_save(df, column, filename, min_length=1, filter_verbs=True):
     if filter_verbs:
         df = df[~df[column].isin(verbs)]
     df = df.sort_values(column)
-    df.to_csv(join('datasets', filename), index=False)
+    DATA_DIRECTORY.mkdir(exist_ok=True)
+    df.to_csv(DATA_DIRECTORY / filename, index=False)
 
 
 def update_werkwoorden(download=True, min_length=3):
@@ -56,9 +60,10 @@ def update_werkwoorden(download=True, min_length=3):
         verbs = verbs.iloc[2:].reset_index()
         verbs = verbs[['werkwoord']]
         verbs.werkwoord = verbs.werkwoord.str.title()
-        verbs.to_csv(join('datasets', 'werkwoorden.csv'), index=False)
+        DATA_DIRECTORY.mkdir(exist_ok=True)
+        verbs.to_csv(DATA_DIRECTORY / 'werkwoorden.csv', index=False)
     else:
-        verbs = pd.read_csv(join('datasets', 'werkwoorden.csv'))
+        verbs = pd.read_csv(DATA_DIRECTORY / 'werkwoorden.csv')
     verbs = verbs.werkwoord.values
 
 
@@ -77,11 +82,13 @@ def update_streetnames(download=True, min_length=6):
             names.name = names.name.astype('str')
             names = names.drop_duplicates()
             names = names[~names.name.str.contains(r'\[')]
-            names.to_csv(join('datasets', 'RAW_streets', 'streets_' + name + '.csv'), index=False)
+            raw_streets_directory = DOWNLOAD_DIRECTORY / 'RAW_streets'
+            raw_streets_directory.mkdir(parents=True, exist_ok=True)
+            names.to_csv(raw_streets_directory / ('streets_' + name + '.csv'), index=False)
     lst = []
     for name in ['Gelderland', 'Overijssel', 'Drenthe', 'Groningen', 'Friesland', 'Zeeland', 'Utrecht',
                  'Limburg', 'Noord-Holland', 'Zuid-Holland', 'Flevoland', 'Noord-Brabant']:
-        lst.append(pd.read_csv(join('datasets', 'RAW_streets', 'streets_' + name + '.csv')))
+        lst.append(pd.read_csv(DOWNLOAD_DIRECTORY / 'RAW_streets' / ('streets_' + name + '.csv')))
     streetnames = pd.concat(lst, axis=0, ignore_index=True)
     streetnames.columns = ['straatnaam']
     filter_and_save(streetnames, 'straatnaam', 'streets_Nederland.csv', min_length=min_length, filter_verbs=True)
@@ -103,8 +110,11 @@ def update_firstnames():
     # Download first names
     #
     url = "http://www.naamkunde.net/?page_id=293&vt_download_xml=true"
-    urllib.request.urlretrieve(url, join("datasets", "RAW_names", "firstnames.xml"))
-    xtree = ElementTree.parse(join("datasets", "RAW_names", "firstnames.xml"))
+    raw_names_directory = DOWNLOAD_DIRECTORY / "RAW_names"
+    raw_names_directory.mkdir(parents=True, exist_ok=True)
+    firstnames_file = raw_names_directory / "firstnames.xml"
+    urllib.request.urlretrieve(url, firstnames_file)
+    xtree = ElementTree.parse(firstnames_file)
     xroot = xtree.getroot()
     firstnames = []
     for node in xroot:
@@ -120,8 +130,11 @@ def update_lastnames():
     # Download last names
     #
     url = "http://www.naamkunde.net/wp-content/uploads/oudedocumenten/fn10k_versie1.zip"
-    urllib.request.urlretrieve(url, join("datasets", "RAW_names", "lastnames.zip"))
-    zf = zipfile.ZipFile(join("datasets", "RAW_names", "lastnames.zip"), 'r')
+    raw_names_directory = DOWNLOAD_DIRECTORY / "RAW_names"
+    raw_names_directory.mkdir(parents=True, exist_ok=True)
+    lastnames_file = raw_names_directory / "lastnames.zip"
+    urllib.request.urlretrieve(url, lastnames_file)
+    zf = zipfile.ZipFile(lastnames_file, 'r')
     f = zf.open("fn_10kw.xml")
     xtree = ElementTree.parse(f)
     xroot = xtree.getroot()

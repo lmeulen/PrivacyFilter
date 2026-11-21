@@ -1,5 +1,5 @@
 /*.ipynb
-/datasets/RAW*
+/data-cache/
 /.ipynb_checkpoints
 /cache
 /results.html

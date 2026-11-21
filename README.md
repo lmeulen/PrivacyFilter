@@ -90,7 +90,13 @@ NLP model loads during application startup. Startup can take time and needs subs
 - Nationalities: CBS dataset 03743
 - Countries: Dutch Wikipedia country list
 
-Check license, attribution, terms, and data-protection requirements before downloading or redistributing refreshed datasets. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Run updater after installing updater dependencies:
+
+```bash
+python DataUpdater.py
+```
+
+Curated CSV output is written directly to `privacyfilter_data/`, single canonical dataset directory included in source distributions and wheels. Raw downloads are stored in ignored `data-cache/`. Review generated changes, source terms, attribution, and data-protection requirements before committing a dataset refresh and creating release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Migrating from 1.x
 

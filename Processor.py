@@ -196,8 +196,8 @@ def main():
     punctuation = ['.', ',', ' ', ':', ';', '?', '!', '']
     no_punctuation = ['']
     fields = {
-        os.path.join('datasets', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": punctuation},
-        os.path.join('datasets', 'countries.csv'): {"replacement": "<LAND>", "punctuation": no_punctuation},
+        os.path.join('privacyfilter_data', 'firstnames.csv'): {"replacement": "<NAAM>", "punctuation": punctuation},
+        os.path.join('privacyfilter_data', 'countries.csv'): {"replacement": "<LAND>", "punctuation": no_punctuation},
     }
 
     for field in fields:

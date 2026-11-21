@@ -22,6 +22,11 @@ jobs:
       - name: Audit dependencies
         if: runner.os == 'Linux'
         run: uv run pip-audit --progress-spinner off
+      - name: Verify canonical dataset layout
+        run: >-
+          uv run python -c "from pathlib import Path; assert not Path('datasets').exists();
+          assert Path('privacyfilter_data/firstnames.csv').is_file();
+          assert Path('privacyfilter_data/lastnames.csv').is_file()"
       - name: Lint for syntax and undefined names
         run: uv run ruff check . --select E9,F63,F7,F82
       - name: Run tests

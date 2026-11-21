@@ -6,7 +6,7 @@ regular_expressions: True
 numbers_to_zero: True
 
 # Datasets to use
-data_directory: 'datasets'
+data_directory: 'privacyfilter_data'
 firstnames: 'firstnames.csv'
 lastnames: 'lastnames.csv'
 places: 'places.csv'
