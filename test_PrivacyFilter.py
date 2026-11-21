@@ -2,6 +2,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from PrivacyFilter import PrivacyFilter, __version__
 
@@ -91,6 +92,47 @@ class TestInitialization(unittest.TestCase):
 
         self.assertFalse(pfilter.use_nlp)
         self.assertIsNone(pfilter.nlp)
+
+    def test_lazy_nlp_loading_preserves_existing_configuration(self):
+        class Token:
+            def __init__(self, text, pos):
+                self.text = text
+                self.tag_ = ""
+                self.pos_ = pos
+                self.ent_type_ = ""
+
+            def __str__(self):
+                return self.text
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            data = Path(temporary_directory) / "keywords.csv"
+            data.write_text("name\nQxzvplm\n", encoding="utf-8")
+            pfilter = PrivacyFilter()
+            pfilter.initialize(
+                nlp_filter=False,
+                wordlist_filter=True,
+                regular_expressions=False,
+                numbers_to_zero=True,
+                fields={str(data): {"replacement": "<NAME>", "punctuation": None}},
+            )
+
+            with patch.object(
+                pfilter,
+                "_load_nlp",
+                side_effect=lambda: setattr(
+                    pfilter,
+                    "nlp",
+                    lambda text: [Token("Qxzvplm", "PROPN"), Token("42", "NUM")],
+                ),
+            ):
+                self.assertEqual(pfilter.filter("Qxzvplm 42", nlp_filter=True), "<FILTERED> 0")
+
+            self.assertFalse(pfilter.use_nlp)
+            self.assertTrue(pfilter.use_wordlist)
+            self.assertFalse(pfilter.use_re)
+            self.assertTrue(pfilter.numbers_to_zero)
+            self.assertEqual(pfilter.nr_keywords, 1)
+            self.assertEqual(pfilter.filter("Qxzvplm 42"), "<FILTERED> 00")
 
 
 class PFTest(unittest.TestCase):

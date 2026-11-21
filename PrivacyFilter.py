@@ -185,15 +185,18 @@ class PrivacyFilter:
         )
 
         if nlp_filter:
-            import spacy
-
-            self.nlp = spacy.load("nl_core_news_lg")
+            self._load_nlp()
         self.use_wordlist = wordlist_filter
         self.clean_accents = clean_accents
         self.use_re = regular_expressions
         self.numbers_to_zero = numbers_to_zero
 
         self.initialised = True
+
+    def _load_nlp(self):
+        import spacy
+
+        self.nlp = spacy.load("nl_core_news_lg")
 
     @staticmethod
     def remove_numbers(text, numbers_to_zero):
@@ -255,8 +258,8 @@ class PrivacyFilter:
         return text
 
     def filter_nlp(self, text):
-        if not self.nlp:
-            self.initialize(clean_accents=self.clean_accents, nlp_filter=True)
+        if self.nlp is None:
+            self._load_nlp()
 
         doc = self.nlp(text)  # Run text through NLP
 
