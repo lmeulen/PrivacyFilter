@@ -6,7 +6,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
-- Moved implementation into stable `privacyfilter` package namespace. Legacy flat modules remain as deprecated compatibility shims until next major release.
+- Removed deprecated flat module compatibility shims and legacy requirements files. Use `privacyfilter.*` imports/module commands and package extras instead.
+- Removed deprecated `seperator` keyword alias; use `separator`.
 
 ## [2.0.0] - 2026-11-21
 

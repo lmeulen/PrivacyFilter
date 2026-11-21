@@ -1,7 +1,0 @@
-# Core filtering and API dependencies
-fastapi>=0.115,<1
-nl-core-news-lg @ https://github.com/explosion/spacy-models/releases/download/nl_core_news_lg-3.8.0/nl_core_news_lg-3.8.0-py3-none-any.whl
-pyopenssl>=25.0,<27
-pyyaml>=6.0.2,<7
-spacy>=3.8,<3.9
-uvicorn>=0.34,<1

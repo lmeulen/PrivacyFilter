@@ -33,7 +33,7 @@ Optional dataset-updater dependencies:
 python -m pip install -e '.[updater]'
 ```
 
-Legacy requirement files remain available: `requirements.txt`, `requirements-updater.txt`, and `requirements-dev.txt`. `uv.lock` pins exact release-tested dependencies. Install it with `uv sync --extra dev`.
+`uv.lock` pins exact release-tested dependencies. Install all development and updater dependencies with `uv sync --extra dev --extra updater --locked`.
 
 ## Library usage
 
@@ -62,7 +62,7 @@ Supported public API:
 from privacyfilter import PIIFilter, PrivacyFilter, __version__, insert_newlines
 ```
 
-Implementation modules use `privacyfilter.*`, including `privacyfilter.api`, `privacyfilter.csv_filter`, and `privacyfilter.updater`. Legacy flat imports such as `from PrivacyFilter import PrivacyFilter` and legacy script filenames still work in 2.x but emit `DeprecationWarning`; migrate to package imports and `python -m privacyfilter.<module>` before next major release.
+Implementation modules use `privacyfilter.*`, including `privacyfilter.api`, `privacyfilter.csv_filter`, and `privacyfilter.updater`. Use module commands such as `python -m privacyfilter.csv_filter` and `python -m privacyfilter.updater`.
 
 ## API
 
@@ -86,7 +86,7 @@ curl http://127.0.0.1:8000/filter \
   -d '{"text":"Jan woont in Arnhem op 12-12-2021.","use_nlp":true}'
 ```
 
-NLP model loads during application startup. Startup can take time and needs substantial memory. Filtering runs in FastAPI's threadpool, so NLP work does not block server event loop. Threadpool capacity remains finite: benchmark realistic request sizes, cap request concurrency at reverse proxy, and use multiple worker processes only after sizing memory for one spaCy model per worker. Run behind a TLS-terminating reverse proxy in production; do not expose plaintext traffic publicly. Generate certificates with `GenerateCertificate.py` only when configuring Uvicorn TLS explicitly.
+NLP model loads during application startup. Startup can take time and needs substantial memory. Filtering runs in FastAPI's threadpool, so NLP work does not block server event loop. Threadpool capacity remains finite: benchmark realistic request sizes, cap request concurrency at reverse proxy, and use multiple worker processes only after sizing memory for one spaCy model per worker. Run behind a TLS-terminating reverse proxy in production; do not expose plaintext traffic publicly. If directly configuring Uvicorn TLS, use `privacyfilter.certificates.generate_certificate` only for local/self-signed development certificates.
 
 ## CSV column filtering
 
@@ -131,10 +131,10 @@ Curated CSV output is written directly to `src/privacyfilter/data/` (packaged as
 ## Migrating from 1.x
 
 - Upgrade runtime to Python 3.12+.
-- Install with `pip install .` or `pip install -r requirements.txt`.
+- Install with `pip install .`; install optional groups with package extras.
 - Use `PrivacyFilter.filter(text, nlp_filter=False)` to disable NLP per request.
 - API initializes NLP at lifespan startup and exposes `/health`.
-- TLS is deployment configuration, no longer implicit in `PrivacyFilterAPI.py`.
+- TLS is deployment configuration, not handled by application module.
 
 ## Development and releases
 

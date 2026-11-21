@@ -1,6 +1,5 @@
 import tempfile
 import unittest
-import warnings
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -46,7 +45,7 @@ class TestFilterCsvColumn(unittest.TestCase):
                 ],
             )
 
-    def test_parse_csv_file_accepts_separator_and_deprecated_alias(self):
+    def test_parse_csv_file_accepts_separator(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
             inputfile = Path(temporary_directory) / "input.csv"
             outputfile = Path(temporary_directory) / "output.csv"
@@ -61,13 +60,6 @@ class TestFilterCsvColumn(unittest.TestCase):
             )
             self.assertEqual(pd.read_csv(outputfile, sep=";").iloc[0, 0], "hello")
 
-            with warnings.catch_warnings(record=True) as caught:
-                warnings.simplefilter("always")
-                FilterCSVColumn.parse_csv_file(
-                    str(inputfile), str(outputfile), [0], PassThroughFilter(), seperator=";"
-                )
-            self.assertEqual(len(caught), 1)
-            self.assertIs(caught[0].category, DeprecationWarning)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,12 @@
 import argparse
 import os
-import warnings
 
 import pandas as pd
 
 from .core import PrivacyFilter
 
 
-def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';', *, seperator=None):
-    if seperator is not None:
-        warnings.warn(
-            "seperator is deprecated; use separator",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        separator = seperator
+def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';'):
     print("Opening input file:")
     print('  Filename         : ' + inputfile)
     df = pd.read_csv(inputfile, sep=separator, encoding="ISO-8859-1")  # , usecols=[0, 1, 2, 3, 4, 5, 6])
