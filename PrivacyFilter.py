@@ -114,10 +114,13 @@ class PrivacyFilter:
                 os.path.join(DEFAULT_DATA_DIRECTORY, 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
             }
 
+        names = []
         for field in fields:
             # If there is a punctuation list, use it.
             if fields[field]["punctuation"] is not None:
                 for name in self.file_to_list(field):
+                    if fields[field]["replacement"] == "<NAAM>":
+                        names.append(name)
                     self.known_keywords[name.casefold()] = fields[field]["replacement"]
                     for c in self._punctuation:
                         self.keyword_processor.add_keyword(
@@ -126,20 +129,13 @@ class PrivacyFilter:
                         )
             else:
                 for name in self.file_to_list(field):
+                    if fields[field]["replacement"] == "<NAAM>":
+                        names.append(name)
                     self.known_keywords[name.casefold()] = fields[field]["replacement"]
                     self.keyword_processor.add_keyword(name, fields[field]["replacement"])
 
-        with open(os.path.join(DEFAULT_DATA_DIRECTORY, 'firstnames.csv'), encoding="utf-8") as file:
-            next(file)
-            firstnames = [line.rstrip() for line in file]
-        with open(os.path.join(DEFAULT_DATA_DIRECTORY, 'lastnames.csv'), encoding="utf-8") as file:
-            next(file)
-            lastnames = [line.rstrip() for line in file]
         if not nlp_filter:
-            for name in firstnames:
-                self.keyword_processor_names.add_keyword(name, "<NAAM>")
-
-            for name in lastnames:
+            for name in names:
                 self.keyword_processor_names.add_keyword(name, "<NAAM>")
 
         # Make the URL regular expression

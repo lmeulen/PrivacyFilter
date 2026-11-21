@@ -93,6 +93,50 @@ class TestInitialization(unittest.TestCase):
         self.assertFalse(pfilter.use_nlp)
         self.assertIsNone(pfilter.nlp)
 
+    def test_custom_yaml_uses_only_configured_name_datasets(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            directory = Path(temporary_directory)
+            (directory / "firstnames.csv").write_text("name\nQxzvplm\n", encoding="utf-8")
+            (directory / "lastnames.csv").write_text("name\nRykjvnt\n", encoding="utf-8")
+            for filename in (
+                "places.csv",
+                "streets.csv",
+                "diseases.csv",
+                "medicines.csv",
+                "nationalities.csv",
+                "countries.csv",
+            ):
+                (directory / filename).write_text("name\n", encoding="utf-8")
+            config = directory / "filter.yaml"
+            config.write_text(
+                "\n".join(
+                    (
+                        "clean_accents: true",
+                        "nlp_filter: false",
+                        "wordlist_filter: true",
+                        "regular_expressions: false",
+                        "numbers_to_zero: false",
+                        f"data_directory: {directory}",
+                        "firstnames: firstnames.csv",
+                        "lastnames: lastnames.csv",
+                        "places: places.csv",
+                        "streets: streets.csv",
+                        "diseases: diseases.csv",
+                        "medicines: medicines.csv",
+                        "nationalities: nationalities.csv",
+                        "countries: countries.csv",
+                    )
+                ),
+                encoding="utf-8",
+            )
+
+            pfilter = PrivacyFilter()
+            pfilter.initialize_from_file(config)
+
+            self.assertEqual(pfilter.filter("Qxzvplm Rykjvnt Jan"), "<FILTERED> <FILTERED> Jan")
+            self.assertNotIn("jan", pfilter.known_keywords)
+            self.assertEqual(pfilter.nr_keywords, 2)
+
     def test_lazy_nlp_loading_preserves_existing_configuration(self):
         class Token:
             def __init__(self, text, pos):
