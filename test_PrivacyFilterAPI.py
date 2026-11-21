@@ -3,8 +3,8 @@ import unittest
 
 from fastapi.testclient import TestClient
 
-from PrivacyFilter import __version__
-from PrivacyFilterAPI import privacyFilterApp
+from privacyfilter import __version__
+from privacyfilter.api import privacyFilterApp
 
 
 class TestPrivacyFilterAPI(unittest.TestCase):

@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from PrivacyFilter import PrivacyFilter, __version__
+from privacyfilter import PrivacyFilter, __version__
 
 
 def file_to_samples(file, directory="test_samples", delimiter="~"):

@@ -46,22 +46,36 @@ dev = [
 [tool.hatch.metadata]
 allow-direct-references = true
 
-[tool.hatch.build]
+[tool.hatch.build.targets.wheel]
+packages = ["src/privacyfilter"]
+
+[tool.hatch.build.targets.sdist]
 include = [
-  "PrivacyFilter.py",
-  "PrivacyFilterAPI.py",
-  "Processor.py",
-  "PIIFilter.py",
-  "DataUpdater.py",
-  "FilterCSVColumn.py",
-  "GenerateCertificate.py",
-  "RunExamples.py",
-  "privacyfilter_data/**",
+  "/src/privacyfilter",
+  "/PrivacyFilter.py",
+  "/PrivacyFilterAPI.py",
+  "/Processor.py",
+  "/PIIFilter.py",
+  "/DataUpdater.py",
+  "/FilterCSVColumn.py",
+  "/GenerateCertificate.py",
+  "/RunExamples.py",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"PrivacyFilter.py" = "PrivacyFilter.py"
+"PrivacyFilterAPI.py" = "PrivacyFilterAPI.py"
+"Processor.py" = "Processor.py"
+"PIIFilter.py" = "PIIFilter.py"
+"DataUpdater.py" = "DataUpdater.py"
+"FilterCSVColumn.py" = "FilterCSVColumn.py"
+"GenerateCertificate.py" = "GenerateCertificate.py"
+"RunExamples.py" = "RunExamples.py"
 
 [tool.pytest.ini_options]
 testpaths = ["."]
 python_files = ["test_*.py"]
+pythonpath = ["src"]
 filterwarnings = ["error"]
 
 [tool.ruff]

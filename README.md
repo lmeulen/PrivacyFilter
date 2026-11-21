@@ -38,7 +38,7 @@ Legacy requirement files remain available: `requirements.txt`, `requirements-upd
 ## Library usage
 
 ```pycon
->>> from PrivacyFilter import PrivacyFilter
+>>> from privacyfilter import PrivacyFilter
 >>> pfilter = PrivacyFilter()
 >>> pfilter.initialize(
 ...     clean_accents=True,
@@ -54,12 +54,22 @@ Legacy requirement files remain available: `requirements.txt`, `requirements-upd
 
 Default datasets ship with installed package. To use custom files, call `initialize_from_file("filter.yaml")`.
 
+### Imports and migration
+
+Supported public API:
+
+```python
+from privacyfilter import PIIFilter, PrivacyFilter, __version__, insert_newlines
+```
+
+Implementation modules use `privacyfilter.*`, including `privacyfilter.api`, `privacyfilter.csv_filter`, and `privacyfilter.updater`. Legacy flat imports such as `from PrivacyFilter import PrivacyFilter` and legacy script filenames still work in 2.x but emit `DeprecationWarning`; migrate to package imports and `python -m privacyfilter.<module>` before next major release.
+
 ## API
 
 Run development server:
 
 ```bash
-uvicorn PrivacyFilterAPI:privacyFilterApp --host 127.0.0.1 --port 8000
+uvicorn privacyfilter.api:privacyFilterApp --host 127.0.0.1 --port 8000
 ```
 
 Endpoints:
@@ -80,16 +90,16 @@ NLP model loads during application startup. Startup can take time and needs subs
 
 ## CSV column filtering
 
-`FilterCSVColumn.py` filters one or more zero-based CSV column indexes. File mode reads and writes semicolon-delimited (`;`) ISO-8859-1 CSV files:
+`privacyfilter.csv_filter` filters one or more zero-based CSV column indexes. File mode reads and writes semicolon-delimited (`;`) ISO-8859-1 CSV files:
 
 ```bash
-python FilterCSVColumn.py --input input.csv --output filtered.csv --column 0 2
+python -m privacyfilter.csv_filter --input input.csv --output filtered.csv --column 0 2
 ```
 
 Directory mode recursively processes comma-delimited (`,`) ISO-8859-1 CSV files and writes each result next to its input with `_filtered` before `.csv`:
 
 ```bash
-python FilterCSVColumn.py --directory incoming-csv --column 1
+python -m privacyfilter.csv_filter --directory incoming-csv --column 1
 # incoming-csv/nested/records.csv -> incoming-csv/nested/records_filtered.csv
 ```
 
@@ -97,7 +107,7 @@ Directory mode skips existing `*_filtered.csv` files, so rerunning command does 
 
 ## Dataset updater
 
-`DataUpdater.py` obtains data from these sources:
+`privacyfilter.updater` obtains data from these sources:
 
 - Names: https://www.naamkunde.net
 - Places: CBS dataset 84992
@@ -111,12 +121,12 @@ Install updater dependencies, then run updater from repository root:
 
 ```bash
 python -m pip install -e '.[updater]'
-python DataUpdater.py
+python -m privacyfilter.updater
 ```
 
 Updater downloads public sources and may take significant time, network bandwidth, memory, and disk space; street data is especially expensive. It uses HTTPS, timeouts, and retries for direct HTTP sources, but upstream APIs, pages, schemas, and network connections can still fail. On failure, read reported source URL/error, retry later for transient service/network failures, and inspect/update parser logic for a source-layout failure. Cached raw downloads are in ignored `data-cache/`; remove stale relevant cache files before retrying a changed source. Do not commit raw cache data.
 
-Curated CSV output is written directly to `privacyfilter_data/`, single canonical dataset directory included in source distributions and wheels. Review generated changes, source terms, attribution, and data-protection requirements before committing a dataset refresh and creating release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Curated CSV output is written directly to `src/privacyfilter/data/` (packaged as `privacyfilter.data`), single canonical dataset directory included in source distributions and wheels. Review generated changes, source terms, attribution, and data-protection requirements before committing a dataset refresh and creating release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Migrating from 1.x
 

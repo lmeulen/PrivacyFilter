@@ -2,6 +2,12 @@
 
 All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- Moved implementation into stable `privacyfilter` package namespace. Legacy flat modules remain as deprecated compatibility shims until next major release.
+
 ## [2.0.0] - 2026-11-21
 
 ### Added

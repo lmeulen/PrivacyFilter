@@ -6,7 +6,7 @@ from unittest.mock import call, patch
 
 import pandas as pd
 
-import FilterCSVColumn
+from privacyfilter import csv_filter as FilterCSVColumn
 
 
 class TestFilterCsvColumn(unittest.TestCase):
@@ -20,8 +20,8 @@ class TestFilterCsvColumn(unittest.TestCase):
             (nested / "child_filtered.csv").write_text("text\nold\n", encoding="ISO-8859-1")
 
             with (
-                patch("FilterCSVColumn.PrivacyFilter") as privacy_filter,
-                patch("FilterCSVColumn.parse_csv_file") as parse_csv_file,
+                patch("privacyfilter.csv_filter.PrivacyFilter") as privacy_filter,
+                patch("privacyfilter.csv_filter.parse_csv_file") as parse_csv_file,
             ):
                 FilterCSVColumn.main_directory(str(root), [0])
 

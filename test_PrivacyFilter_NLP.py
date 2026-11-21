@@ -1,7 +1,7 @@
 import unittest
 import re
 
-from PrivacyFilter import PrivacyFilter
+from privacyfilter import PrivacyFilter
 
 
 def file_to_samples(file, directory="test_samples", delimiter="~"):

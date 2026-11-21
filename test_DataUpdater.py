@@ -5,13 +5,13 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-import DataUpdater
+from privacyfilter import updater as DataUpdater
 
 
 class TestDataUpdater(unittest.TestCase):
     def test_filter_and_save_writes_canonical_package_data_directory(self):
         with tempfile.TemporaryDirectory() as temporary_directory:
-            data_directory = Path(temporary_directory) / "privacyfilter_data"
+            data_directory = Path(temporary_directory) / "data"
             dataframe = pd.DataFrame({"name": ["Beta", "Alpha", "Alpha"]})
 
             with patch.object(DataUpdater, "DATA_DIRECTORY", data_directory):

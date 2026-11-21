@@ -9,13 +9,13 @@ class TestReadmeExamples(unittest.TestCase):
         readme = Path("README.md").read_text(encoding="utf-8")
 
         for text in (
-            "python FilterCSVColumn.py --input input.csv --output filtered.csv --column 0 2",
-            "python FilterCSVColumn.py --directory incoming-csv --column 1",
+            "python -m privacyfilter.csv_filter --input input.csv --output filtered.csv --column 0 2",
+            "python -m privacyfilter.csv_filter --directory incoming-csv --column 1",
             "semicolon-delimited (`;`) ISO-8859-1",
             "comma-delimited (`,`) ISO-8859-1",
             "`*_filtered.csv`",
             "python -m pip install -e '.[updater]'",
-            "python DataUpdater.py",
+            "python -m privacyfilter.updater",
             "significant time, network bandwidth, memory, and disk space",
             "retry later",
         ):
