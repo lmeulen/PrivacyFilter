@@ -5,6 +5,22 @@ from pathlib import Path
 
 
 class TestReadmeExamples(unittest.TestCase):
+    def test_csv_and_updater_workflows_are_documented(self):
+        readme = Path("README.md").read_text(encoding="utf-8")
+
+        for text in (
+            "python FilterCSVColumn.py --input input.csv --output filtered.csv --column 0 2",
+            "python FilterCSVColumn.py --directory incoming-csv --column 1",
+            "semicolon-delimited (`;`) ISO-8859-1",
+            "comma-delimited (`,`) ISO-8859-1",
+            "`*_filtered.csv`",
+            "python -m pip install -e '.[updater]'",
+            "python DataUpdater.py",
+            "significant time, network bandwidth, memory, and disk space",
+            "retry later",
+        ):
+            self.assertIn(text, readme)
+
     def test_library_usage_example(self):
         readme = Path("README.md").read_text(encoding="utf-8")
         match = re.search(r"```pycon\n(.*?)```", readme, flags=re.DOTALL)

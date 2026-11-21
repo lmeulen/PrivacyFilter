@@ -78,6 +78,23 @@ curl http://127.0.0.1:8000/filter \
 
 NLP model loads during application startup. Startup can take time and needs substantial memory. Filtering runs in FastAPI's threadpool, so NLP work does not block server event loop. Threadpool capacity remains finite: benchmark realistic request sizes, cap request concurrency at reverse proxy, and use multiple worker processes only after sizing memory for one spaCy model per worker. Run behind a TLS-terminating reverse proxy in production; do not expose plaintext traffic publicly. Generate certificates with `GenerateCertificate.py` only when configuring Uvicorn TLS explicitly.
 
+## CSV column filtering
+
+`FilterCSVColumn.py` filters one or more zero-based CSV column indexes. File mode reads and writes semicolon-delimited (`;`) ISO-8859-1 CSV files:
+
+```bash
+python FilterCSVColumn.py --input input.csv --output filtered.csv --column 0 2
+```
+
+Directory mode recursively processes comma-delimited (`,`) ISO-8859-1 CSV files and writes each result next to its input with `_filtered` before `.csv`:
+
+```bash
+python FilterCSVColumn.py --directory incoming-csv --column 1
+# incoming-csv/nested/records.csv -> incoming-csv/nested/records_filtered.csv
+```
+
+Directory mode skips existing `*_filtered.csv` files, so rerunning command does not filter generated output again. Use file mode for another delimiter or encoding only after converting source CSV to semicolon-delimited ISO-8859-1; script currently has no delimiter or encoding command-line options. Filtering loads spaCy NLP and can be slow for large files. Test representative samples first, retain unfiltered source, and review output before sharing it.
+
 ## Dataset updater
 
 `DataUpdater.py` obtains data from these sources:
@@ -90,13 +107,16 @@ NLP model loads during application startup. Startup can take time and needs subs
 - Nationalities: CBS dataset 03743
 - Countries: Dutch Wikipedia country list
 
-Run updater after installing updater dependencies:
+Install updater dependencies, then run updater from repository root:
 
 ```bash
+python -m pip install -e '.[updater]'
 python DataUpdater.py
 ```
 
-Curated CSV output is written directly to `privacyfilter_data/`, single canonical dataset directory included in source distributions and wheels. Raw downloads are stored in ignored `data-cache/`. Review generated changes, source terms, attribution, and data-protection requirements before committing a dataset refresh and creating release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Updater downloads public sources and may take significant time, network bandwidth, memory, and disk space; street data is especially expensive. It uses HTTPS, timeouts, and retries for direct HTTP sources, but upstream APIs, pages, schemas, and network connections can still fail. On failure, read reported source URL/error, retry later for transient service/network failures, and inspect/update parser logic for a source-layout failure. Cached raw downloads are in ignored `data-cache/`; remove stale relevant cache files before retrying a changed source. Do not commit raw cache data.
+
+Curated CSV output is written directly to `privacyfilter_data/`, single canonical dataset directory included in source distributions and wheels. Review generated changes, source terms, attribution, and data-protection requirements before committing a dataset refresh and creating release. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Migrating from 1.x
 
