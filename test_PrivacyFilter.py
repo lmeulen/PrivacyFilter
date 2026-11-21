@@ -1,6 +1,7 @@
 import re
+import tempfile
 import unittest
-import re
+from pathlib import Path
 
 from PrivacyFilter import PrivacyFilter, __version__
 
@@ -50,6 +51,46 @@ class TestReleaseMetadata(unittest.TestCase):
         pfilter.initialize(nlp_filter=False, wordlist_filter=True)
 
         self.assertEqual(pfilter.filter("Arnhem"), "<FILTERED>")
+
+
+class TestInitialization(unittest.TestCase):
+    def test_reinitialization_resets_loaded_keywords_and_count(self):
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            first_data = Path(temporary_directory) / "first.csv"
+            second_data = Path(temporary_directory) / "second.csv"
+            first_data.write_text("name\nQxzvplm\n", encoding="utf-8")
+            second_data.write_text("name\nRykjvnt\n", encoding="utf-8")
+
+            pfilter = PrivacyFilter()
+            pfilter.initialize(
+                nlp_filter=False,
+                wordlist_filter=True,
+                regular_expressions=False,
+                fields={str(first_data): {"replacement": "<NAME>", "punctuation": None}},
+            )
+            self.assertEqual(pfilter.nr_keywords, 1)
+            self.assertEqual(pfilter.filter("Qxzvplm"), "<FILTERED>")
+
+            pfilter.initialize(
+                nlp_filter=False,
+                wordlist_filter=True,
+                regular_expressions=False,
+                fields={str(second_data): {"replacement": "<NAME>", "punctuation": None}},
+            )
+
+            self.assertEqual(pfilter.nr_keywords, 1)
+            self.assertEqual(pfilter.filter("Qxzvplm"), "Qxzvplm")
+            self.assertEqual(pfilter.filter("Rykjvnt"), "<FILTERED>")
+
+    def test_reinitialization_disables_nlp_and_clears_model(self):
+        pfilter = PrivacyFilter()
+        pfilter.nlp = object()
+        pfilter.use_nlp = True
+
+        pfilter.initialize(nlp_filter=False, wordlist_filter=False)
+
+        self.assertFalse(pfilter.use_nlp)
+        self.assertIsNone(pfilter.nlp)
 
 
 class PFTest(unittest.TestCase):

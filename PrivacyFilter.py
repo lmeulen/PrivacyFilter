@@ -87,12 +87,20 @@ class PrivacyFilter:
 
     def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False,
                    regular_expressions=True, numbers_to_zero=False, fields=None):
+        self.keyword_processor = KeywordProcessor(case_sensitive=False)
+        self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
+        self.url_re = None
+        self.initialised = False
+        self.nr_keywords = 0
+        self.known_keywords = {}
+        self.nlp = None
+        self.use_nlp = nlp_filter
 
         # Add words with an append character to prevent replacing partial words by tags.
         # E.g. there is a street named AA and a verb AABB, with this additional character
         # would lead to <ADRES>BB which is incorrect. Another way to solve this might be the
         # implementation of a token based algorithm.
-        if not fields:
+        if fields is None:
             fields = {
                 os.path.join(DEFAULT_DATA_DIRECTORY, 'firstnames.csv'): {"replacement": "<NAAM>",
                                                              "punctuation": None if nlp_filter else self._punctuation},
@@ -180,7 +188,6 @@ class PrivacyFilter:
             import spacy
 
             self.nlp = spacy.load("nl_core_news_lg")
-            self.use_nlp = True
         self.use_wordlist = wordlist_filter
         self.clean_accents = clean_accents
         self.use_re = regular_expressions
