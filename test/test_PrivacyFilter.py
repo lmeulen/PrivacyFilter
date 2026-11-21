@@ -45,7 +45,7 @@ def run_test_function_with_data(self, function, sample, *args, **kwargs):
 
 class TestReleaseMetadata(unittest.TestCase):
     def test_version(self):
-        self.assertEqual(__version__, "2.0.0")
+        self.assertEqual(__version__, "2.0.1")
 
     def test_default_data_is_packaged(self):
         pfilter = PrivacyFilter()

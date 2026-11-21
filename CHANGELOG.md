@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## Unreleased
 
+## [2.0.1] - 2026-11-21
+
 ### Changed
 
 - Moved pyOpenSSL from core runtime dependencies to optional `certificates` extra used only by self-signed development certificate helper.
@@ -12,9 +14,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Corrected `PrivacyFilter.to_string()` class-name typo and added public-path type annotations.
 - Enabled maintained Ruff lint rules and formatting checks for refactored modules.
 
+### Fixed
+
+- Reset stale filter initialization state and preserve custom configuration during lazy NLP loading.
+- Use custom configured name datasets for fallback filtering.
+- Correct recursive CSV paths and skip generated filtered files on reruns.
+- Run blocking API filtering in FastAPI's threadpool.
+- Correct README filtering example output.
+- Escape dynamic example-report content to prevent HTML/script injection; make XSS regression fixture Windows-safe.
+
 ### Security
 
-- Escaped dynamic example-report content to prevent HTML/script injection in generated HTML.
+- Harden dataset updater downloads and parsing with HTTPS, timeouts, retries, status validation, and actionable schema errors.
 
 ### Changed
 

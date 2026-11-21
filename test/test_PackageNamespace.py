@@ -12,7 +12,7 @@ class TestPackageNamespace(unittest.TestCase):
     def test_supported_public_api_and_packaged_data(self):
         import privacyfilter
 
-        self.assertEqual(privacyfilter.__version__, "2.0.0")
+        self.assertEqual(privacyfilter.__version__, "2.0.1")
         self.assertTrue(callable(privacyfilter.PrivacyFilter))
         self.assertTrue(callable(privacyfilter.PIIFilter))
         self.assertTrue((files("privacyfilter.data") / "firstnames.csv").is_file())
