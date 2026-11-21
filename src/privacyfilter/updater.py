@@ -1,15 +1,16 @@
 import re
+import string
+import unicodedata
 import xml.etree.ElementTree as ElementTree
 import zipfile
+from pathlib import Path
+
 import cbsodata
 import numpy as np
 import osmnx as ox
 import pandas as pd
 import requests
-import unicodedata
-import string
 from bs4 import BeautifulSoup
-from pathlib import Path
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 

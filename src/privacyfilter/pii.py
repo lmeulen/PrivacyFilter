@@ -2,12 +2,25 @@ from .core import PrivacyFilter
 
 
 class PIIFilter(PrivacyFilter):
+    """Compatibility-focused filter with all filtering mechanisms enabled."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
+        self.initialize(
+            clean_accents=True,
+            nlp_filter=True,
+            wordlist_filter=True,
+            regular_expressions=True,
+        )
 
-    def filter(self, text, clean_accents=True, nlp_filter=True, regexp_filter=True, wordlist_filter=True):
+    def filter(
+        self,
+        text: object,
+        clean_accents: bool = True,
+        nlp_filter: bool = True,
+        regexp_filter: bool = True,
+        wordlist_filter: bool = True,
+    ) -> str:
         # Assure that a string is parsed
         text = str(text)
 

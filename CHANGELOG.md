@@ -4,6 +4,12 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## Unreleased
 
+### Changed
+
+- Split configuration/data loading, regular-expression formatting rules, and spaCy NLP interpretation into focused typed components behind the stable `PrivacyFilter` API.
+- Corrected `PrivacyFilter.to_string()` class-name typo and added public-path type annotations.
+- Enabled maintained Ruff lint rules and formatting checks for refactored modules.
+
 ### Security
 
 - Escaped dynamic example-report content to prevent HTML/script injection in generated HTML.

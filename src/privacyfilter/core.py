@@ -1,18 +1,17 @@
-import time
-import re
 import os
-import yaml
-import unicodedata
+import re
+import time
 from importlib.resources import files
+from os import PathLike
 
-from ._version import __version__
+from . import nlp, rules
+from .configuration import FieldMap, load_configuration, read_dataset
 from .processor import KeywordProcessor
 
 DEFAULT_DATA_DIRECTORY = files("privacyfilter.data")
 
 
 class PrivacyFilter:
-
     def __init__(self):
         self.keyword_processor = KeywordProcessor(case_sensitive=False)
         self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
@@ -27,65 +26,47 @@ class PrivacyFilter:
         self.use_re = False
         self.numbers_to_zero = False
         ##### CONSTANTS #####
-        self._punctuation = ['.', ',', ' ', ':', ';', '?', '!']
+        self._punctuation = [".", ",", " ", ":", ";", "?", "!"]
         self._capture_words = ["PROPN", "NOUN"]
         self._nlp_blacklist_entities = ["WORK_OF_ART"]
         self._nlp_name_stopwords = {"Er"}
 
-    def to_string(self):
-        return 'PrivacyFiter(clean_accents=' + str(self.clean_accents) + ', use_nlp=' + str(self.use_nlp) + \
-               ', use_wordlist=' + str(self.use_wordlist) + ')'
+    def to_string(self) -> str:
+        """Return current configuration in readable form."""
+        return (
+            f"PrivacyFilter(clean_accents={self.clean_accents}, use_nlp={self.use_nlp}, "
+            f"use_wordlist={self.use_wordlist})"
+        )
 
-    def file_to_list(self, filename, drop_first=True):
-        items_count = 0
-        items = []
-
-        with open(filename, "r", encoding="utf-8") as f:
-            if drop_first:
-                f.readline()
-
-            for line in f.readlines():
-                items_count += 1
-                line = line.rstrip()
-                items.append(line)
-
-        self.nr_keywords += items_count
+    def file_to_list(
+        self, filename: str | PathLike[str], drop_first: bool = True
+    ) -> list[str]:
+        """Load dataset and update configured keyword count."""
+        items = read_dataset(filename, drop_header=drop_first)
+        self.nr_keywords += len(items)
         return items
 
-    def initialize_from_file(self, filename):
+    def initialize_from_file(self, filename: str | PathLike[str]) -> None:
+        """Initialize filter from YAML configuration file."""
+        configuration = load_configuration(filename, self._punctuation)
+        self.initialize(
+            clean_accents=configuration.clean_accents,
+            nlp_filter=configuration.nlp_filter,
+            wordlist_filter=configuration.wordlist_filter,
+            regular_expressions=configuration.regular_expressions,
+            numbers_to_zero=configuration.numbers_to_zero,
+            fields=configuration.fields,
+        )
 
-        with open(filename) as file:
-            data = yaml.load(file, Loader=yaml.FullLoader)
-
-        clean_accents = data['clean_accents']
-        nlp_filter = data['nlp_filter']
-        wordlist_filter = data['wordlist_filter']
-        regular_expressions = data['regular_expressions']
-        numbers_to_zero = data['numbers_to_zero']
-        datadir = data['data_directory']
-
-        fields = {
-            os.path.join(datadir, data['firstnames']): {"replacement": "<NAAM>",
-                                                        "punctuation": None if nlp_filter else self._punctuation},
-            os.path.join(datadir, data['lastnames']): {"replacement": "<NAAM>",
-                                                       "punctuation": None if nlp_filter else self._punctuation},
-            os.path.join(datadir, data['places']): {"replacement": "<PLAATS>", "punctuation": None},
-            os.path.join(datadir, data['streets']): {"replacement": "<ADRES>", "punctuation": None},
-            os.path.join(datadir, data['diseases']): {"replacement": "<AANDOENING>", "punctuation": None},
-            os.path.join(datadir, data['medicines']): {"replacement": "<MEDICIJN>", "punctuation": None},
-            os.path.join(datadir, data['nationalities']): {"replacement": "<NATIONALITEIT>", "punctuation": None},
-            os.path.join(datadir, data['countries']): {"replacement": "<LAND>", "punctuation": None},
-        }
-
-        self.initialize(clean_accents=clean_accents,
-                        nlp_filter=nlp_filter,
-                        wordlist_filter=wordlist_filter,
-                        regular_expressions=regular_expressions,
-                        numbers_to_zero=numbers_to_zero,
-                        fields=fields)
-
-    def initialize(self, clean_accents=True, nlp_filter=True, wordlist_filter=False,
-                   regular_expressions=True, numbers_to_zero=False, fields=None):
+    def initialize(
+        self,
+        clean_accents: bool = True,
+        nlp_filter: bool = True,
+        wordlist_filter: bool = False,
+        regular_expressions: bool = True,
+        numbers_to_zero: bool = False,
+        fields: FieldMap | None = None,
+    ) -> None:
         self.keyword_processor = KeywordProcessor(case_sensitive=False)
         self.keyword_processor_names = KeywordProcessor(case_sensitive=True)
         self.url_re = None
@@ -101,16 +82,38 @@ class PrivacyFilter:
         # implementation of a token based algorithm.
         if fields is None:
             fields = {
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'firstnames.csv'): {"replacement": "<NAAM>",
-                                                             "punctuation": None if nlp_filter else self._punctuation},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'lastnames.csv'): {"replacement": "<NAAM>",
-                                                            "punctuation": None if nlp_filter else self._punctuation},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'places.csv'): {"replacement": "<PLAATS>", "punctuation": None},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'streets_Nederland.csv'): {"replacement": "<ADRES>", "punctuation": None},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'diseases.csv'): {"replacement": "<AANDOENING>", "punctuation": None},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'medicines.csv'): {"replacement": "<MEDICIJN>", "punctuation": None},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'nationalities.csv'): {"replacement": "<NATIONALITEIT>", "punctuation": None},
-                os.path.join(DEFAULT_DATA_DIRECTORY, 'countries.csv'): {"replacement": "<LAND>", "punctuation": None},
+                os.path.join(DEFAULT_DATA_DIRECTORY, "firstnames.csv"): {
+                    "replacement": "<NAAM>",
+                    "punctuation": None if nlp_filter else self._punctuation,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "lastnames.csv"): {
+                    "replacement": "<NAAM>",
+                    "punctuation": None if nlp_filter else self._punctuation,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "places.csv"): {
+                    "replacement": "<PLAATS>",
+                    "punctuation": None,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "streets_Nederland.csv"): {
+                    "replacement": "<ADRES>",
+                    "punctuation": None,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "diseases.csv"): {
+                    "replacement": "<AANDOENING>",
+                    "punctuation": None,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "medicines.csv"): {
+                    "replacement": "<MEDICIJN>",
+                    "punctuation": None,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "nationalities.csv"): {
+                    "replacement": "<NATIONALITEIT>",
+                    "punctuation": None,
+                },
+                os.path.join(DEFAULT_DATA_DIRECTORY, "countries.csv"): {
+                    "replacement": "<LAND>",
+                    "punctuation": None,
+                },
             }
 
         names = []
@@ -124,14 +127,16 @@ class PrivacyFilter:
                     for c in self._punctuation:
                         self.keyword_processor.add_keyword(
                             "{n}{c}".format(n=name, c=c),
-                            "{n}{c}".format(n=fields[field]["replacement"], c=c)
+                            "{n}{c}".format(n=fields[field]["replacement"], c=c),
                         )
             else:
                 for name in self.file_to_list(field):
                     if fields[field]["replacement"] == "<NAAM>":
                         names.append(name)
                     self.known_keywords[name.casefold()] = fields[field]["replacement"]
-                    self.keyword_processor.add_keyword(name, fields[field]["replacement"])
+                    self.keyword_processor.add_keyword(
+                        name, fields[field]["replacement"]
+                    )
 
         if not nlp_filter:
             for name in names:
@@ -139,44 +144,48 @@ class PrivacyFilter:
 
         # Make the URL regular expression
         # https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python
-        ul = '\u00a1-\uffff'  # Unicode letters range (must not be a raw string).
+        ul = "\u00a1-\uffff"  # Unicode letters range (must not be a raw string).
 
         # IP patterns
-        ipv4_re = r'(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}'
-        ipv6_re = r'\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,'\
-                  r'4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{'\
-                  r'1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,'\
-                  r'3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|['\
-                  r'1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,'\
-                  r'2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|((['\
-                  r'0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:['\
-                  r'0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2['\
-                  r'0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,'\
-                  r'5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?'
+        ipv4_re = r"(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)(?:\.(?:0|25[0-5]|2[0-4]\d|1\d?\d?|[1-9]\d?)){3}"
+        ipv6_re = (
+            r"\[?((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,"
+            r"4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{"
+            r"1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2["
+            r"0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,"
+            r"3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|["
+            r"1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,"
+            r"2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|((["
+            r"0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2["
+            r"0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:["
+            r"0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2["
+            r"0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,"
+            r"5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\]?"
+        )
 
         # Host patterns
-        hostname_re = r'[a-z' + ul + r'0-9](?:[a-z' + ul + r'0-9-]{0,61}[a-z' + ul + r'0-9])?'
-        # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
-        domain_re = r'(?:\.(?!-)[a-z' + ul + r'0-9-]{1,63}(?<!-))*'
-        tld_re = (
-                r'\.'                                # dot
-                r'(?!-)'                             # can't start with a dash
-                r'(?:[a-z' + ul + '-]{2,63}'         # domain label
-                r'|xn--[a-z0-9]{1,59})'              # or punycode label
-                r'(?<!-)'                            # can't end with a dash
-                r'\.?'                               # may have a trailing dot
+        hostname_re = (
+            r"[a-z" + ul + r"0-9](?:[a-z" + ul + r"0-9-]{0,61}[a-z" + ul + r"0-9])?"
         )
-        host_re = '(' + hostname_re + domain_re + tld_re + '|localhost)'
+        # Max length for domain name labels is 63 characters per RFC 1034 sec. 3.1
+        domain_re = r"(?:\.(?!-)[a-z" + ul + r"0-9-]{1,63}(?<!-))*"
+        tld_re = (
+            r"\."  # dot
+            r"(?!-)"  # can't start with a dash
+            r"(?:[a-z" + ul + "-]{2,63}"  # domain label
+            r"|xn--[a-z0-9]{1,59})"  # or punycode label
+            r"(?<!-)"  # can't end with a dash
+            r"\.?"  # may have a trailing dot
+        )
+        host_re = "(" + hostname_re + domain_re + tld_re + "|localhost)"
 
         self.url_re = re.compile(
-            r'([a-z0-9.+-]*:?//)?'                                       # scheme is validated separately
-            r'(?:[^\s:@/]+(?::[^\s:@/]*)?@)?'                           # user:pass authentication
-            r'(?:' + ipv4_re + '|' + ipv6_re + '|' + host_re + ')'
-            r'(?::\d{2,5})?'                                            # port
-            r'(?:[/?#][^\s]*)?',                                        # resource path
-            re.IGNORECASE
+            r"([a-z0-9.+-]*:?//)?"  # scheme is validated separately
+            r"(?:[^\s:@/]+(?::[^\s:@/]*)?@)?"  # user:pass authentication
+            r"(?:" + ipv4_re + "|" + ipv6_re + "|" + host_re + ")"
+            r"(?::\d{2,5})?"  # port
+            r"(?:[/?#][^\s]*)?",  # resource path
+            re.IGNORECASE,
         )
 
         if nlp_filter:
@@ -188,55 +197,21 @@ class PrivacyFilter:
 
         self.initialised = True
 
-    def _load_nlp(self):
-        import spacy
+    def _load_nlp(self) -> None:
+        """Load spaCy only when NLP filtering is configured or requested."""
+        self.nlp = nlp.load_model()
 
-        self.nlp = spacy.load("nl_core_news_lg")
-
-    @staticmethod
-    def remove_numbers(text, numbers_to_zero):
-        if numbers_to_zero:
-            return re.sub(r'\d', '0', text).strip()
-        else:
-            return re.sub(r'\w*\d\w*', '<GETAL>', text).strip()
-
-    @staticmethod
-    def remove_times(text):
-        return re.sub(r'(\d{1,2})[.:](\d{1,2})?([ ]?(am|pm|AM|PM))?', '<TIJD>', text)
-
-    @staticmethod
-    def remove_dates(text):
-        text = re.sub(r"\d{2}[- /.]\d{2}[- /.]\d{,4}", "<DATUM>", text)
-
-        text = re.sub(
-            r"(\d{1,2}[^\w]{,2}(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)"
-            r"([- /.]{,2}(\d{4}|\d{2}))?)",
-            "<DATUM>", text)
-
-        text = re.sub(
-            r"(\d{1,2}[^\w]{,2}(jan|feb|mrt|apr|mei|jun|jul|aug|sep|okt|nov|dec))[- /.](\d{4}|\d{2})?",
-            "<DATUM>", text)
-        return text
-
-    @staticmethod
-    def remove_email(text):
-        return re.sub(r"(([a-zA-Z0-9_+]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?))"
-                      r"(?![^<]*>)",
-                      "<EMAIL>",
-                      text)
+    remove_numbers = staticmethod(rules.remove_numbers)
+    remove_times = staticmethod(rules.remove_times)
+    remove_dates = staticmethod(rules.remove_dates)
+    remove_email = staticmethod(rules.remove_email)
 
     def remove_url(self, text):
         text = re.sub(self.url_re, "<URL>", text)
         return text
 
-    @staticmethod
-    def remove_postal_codes(text):
-        return re.sub(r"\b([0-9]{4}\s?[a-zA-Z]{2})\b", "<POSTCODE>", text)
-
-    @staticmethod
-    def remove_accents(text):
-        text = unicodedata.normalize('NFD', text).encode('ascii', 'ignore')
-        return str(text.decode("utf-8"))
+    remove_postal_codes = staticmethod(rules.remove_postal_codes)
+    remove_accents = staticmethod(rules.remove_accents)
 
     def filter_keyword_processors(self, text):
         text = self.keyword_processor.replace_keywords(text)
@@ -252,94 +227,23 @@ class PrivacyFilter:
         text = self.remove_numbers(text, self.numbers_to_zero)
         return text
 
-    def filter_nlp(self, text):
+    def filter_nlp(self, text: str) -> str:
+        """Filter text through loaded spaCy adapter."""
         if self.nlp is None:
             self._load_nlp()
+        return nlp.filter_text(
+            text,
+            self.nlp,
+            self.known_keywords,
+            self.numbers_to_zero,
+            self._capture_words,
+            self._nlp_blacklist_entities,
+            self._nlp_name_stopwords,
+        )
 
-        doc = self.nlp(text)  # Run text through NLP
+    cleanup_text = staticmethod(rules.cleanup_text)
 
-        # Word, tags, word type, entity type
-        tagged_words = [(str(word), word.tag_, word.pos_, word.ent_type_) for word in doc]
-        tagged_words_new = []
-
-        index = 0
-        length = len(tagged_words)
-        capture_string = ""
-        captured_entity = ""
-
-        for tagged_word in tagged_words:
-            word, tags, word_type, entity_type = tagged_word
-            is_capture_word = word_type in self._capture_words
-
-            # If it is a capture word, add it to the string to be tested
-            if is_capture_word:
-                capture_string += "{} ".format(word)
-                if (
-                    entity_type != ""
-                    and entity_type not in self._nlp_blacklist_entities
-                    and (
-                        word_type == "PROPN"
-                        or word[:1].isupper()
-                        or entity_type in {"DATE", "TIME"}
-                    )
-                ):
-                    captured_entity = entity_type
-
-            # Check if next word is also forbidden
-            if is_capture_word and index + 1 < length:
-                next_word = tagged_words[index + 1]
-                if next_word[2] in self._capture_words:
-                    index += 1
-                    continue
-
-            # Filter the collected words if they are captured
-            if is_capture_word:
-                if captured_entity == "" or captured_entity in self._nlp_blacklist_entities:
-                    replaced = capture_string.strip()
-                    if capture_string[:1].isupper():
-                        replaced = self.known_keywords.get(replaced.casefold(), replaced)
-                else:
-                    replaced = "<{}>".format(captured_entity)
-
-            elif word_type == "NUM":
-                if self.numbers_to_zero:
-                    replaced = "0"
-                else:
-                    replaced = "<GETAL>"
-            else:
-                # Fall back to curated lists when NLP assigns an unexpected POS.
-                # Model upgrades can classify proper names as AUX or other types.
-                if word[:1].isupper() and word not in self._nlp_name_stopwords:
-                    replaced = self.known_keywords.get(word.casefold(), word)
-                else:
-                    replaced = word
-
-            # Replace the word, even if it wasn't replaced
-            tagged_words_new.append((replaced, tags, word_type, captured_entity))
-
-            index += 1
-            capture_string = ""
-            captured_entity = ""
-
-        # Rebuild the string from the filtered output
-        new_string = ""
-        for tagged_word in tagged_words_new:
-            word, tags, word_type, entity_type = tagged_word
-            new_string += (" " if word_type != "PUNCT" else "") + word  # Prepend spaces, except for punctuation.
-
-        new_string = new_string.strip()
-        return new_string
-
-    @staticmethod
-    def cleanup_text(result):
-        result = re.sub("<[A-Z _]+>", "<FILTERED>", result)
-        result = re.sub(" ([ ,.:;?!])", "\\1", result)
-        result = re.sub(" +", " ", result)                          # remove multiple spaces
-        result = re.sub("\n +", "\n", result)                       # remove space after newline
-        result = re.sub("( <FILTERED>)+", " <FILTERED>", result)    # remove multiple consecutive <FILTERED> tags
-        return result.strip()
-
-    def filter(self, text, nlp_filter=None):
+    def filter(self, text: object, nlp_filter: bool | None = None) -> str:
         if not self.initialised:
             self.initialize()
         text = str(text)
@@ -357,7 +261,7 @@ class PrivacyFilter:
 
         return self.cleanup_text(text)
 
-    def filter_static(self, text):
+    def filter_static(self, text: str) -> str:
         text = " " + text + " "
         text = self.filter_regular_expressions(text)
         text = self.filter_keyword_processors(text)
@@ -383,37 +287,42 @@ def insert_newlines(string, every=64, window=10):
     while len(from_string) > 0:
         cut_off = every
         if len(from_string) > every:
-            while (from_string[cut_off - 1] != ' ') and (cut_off > (every - window)):
+            while (from_string[cut_off - 1] != " ") and (cut_off > (every - window)):
                 cut_off -= 1
         else:
             cut_off = len(from_string)
         part = from_string[:cut_off]
-        result += part + '\n'
+        result += part + "\n"
         from_string = from_string[cut_off:]
     return result[:-1]
 
 
 def main():
-    zin = "De mogelijkheden zijn sinds 2014 groot geworden, zeker vergeleken met 2012, hè Kees? Het systeem maakt " \
-          "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 " \
-          "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is " \
-          "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier " \
-          "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
+    zin = (
+        "De mogelijkheden zijn sinds 2014 groot geworden, zeker vergeleken met 2012, hè Kees? Het systeem maakt "
+        "verschillende bewerkingen mogelijk die hiervoor niet mogelijk waren. De datum is 24-01-2011 (of 24 jan 21 "
+        "of 24 januari 2011). Ik ben te bereiken op naam@hostingpartner.nl en woon in Arnhem. Mijn adres is "
+        "Maasstraat 231, 1234AB. Mijn naam is Thomas Janssen en ik heb zweetvoeten. Oh ja, ik gebruik hier "
+        "heparine ( https://host.com/dfgr/dfdew ) voor. Simòne. Ik heet Lexan."
+    )
 
     print(insert_newlines(zin, 120))
 
     start = time.time()
     pfilter = PrivacyFilter()
-    pfilter.initialize_from_file('filter.yaml')
-    print('\nInitialisation time       : %4.0f msec' % ((time.time() - start) * 1000))
-    print('Number of forbidden words : ' + str(pfilter.nr_keywords))
+    pfilter.initialize_from_file("filter.yaml")
+    print("\nInitialisation time       : %4.0f msec" % ((time.time() - start) * 1000))
+    print("Number of forbidden words : " + str(pfilter.nr_keywords))
 
     start = time.time()
     nr_sentences = 100
-    for i in range(0, nr_sentences):
+    for _ in range(nr_sentences):
         zin2 = pfilter.filter(zin)
 
-    print('Time per sentence         : %4.2f msec' % ((time.time() - start) * 1000 / nr_sentences))
+    print(
+        "Time per sentence         : %4.2f msec"
+        % ((time.time() - start) * 1000 / nr_sentences)
+    )
     print()
     print(insert_newlines(zin2, 120))
 

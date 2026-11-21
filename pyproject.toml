@@ -60,3 +60,23 @@ filterwarnings = ["error"]
 
 [tool.ruff]
 target-version = "py312"
+lint.select = ["E", "F", "I", "B"]
+lint.ignore = ["E501"]
+
+[tool.ruff.format]
+exclude = [
+  "src/privacyfilter/api.py",
+  "src/privacyfilter/certificates.py",
+  "src/privacyfilter/csv_filter.py",
+  "src/privacyfilter/examples.py",
+  "src/privacyfilter/pii.py",
+  "src/privacyfilter/processor.py",
+  "src/privacyfilter/updater.py",
+  "test/test_DataUpdater.py",
+  "test/test_Examples.py",
+  "test/test_FilterCSVColumn.py",
+  "test/test_PrivacyFilter.py",
+  "test/test_PrivacyFilterAPI.py",
+  "test/test_PrivacyFilter_NLP.py",
+  "test/test_ReleaseVersion.py",
+]

@@ -2,11 +2,9 @@
 
 import argparse
 import re
-import sys
 import zipfile
 from email.parser import BytesParser
 from pathlib import Path
-
 
 TAG_VERSION = re.compile(r"^v(?P<version>[0-9]+\.[0-9]+\.[0-9]+(?:(?:a|b|rc)[0-9]+)?)$")
 VERSION_FILE = re.compile(r'^__version__\s*=\s*["\'](?P<version>[^"\']+)["\']\s*$', re.MULTILINE)

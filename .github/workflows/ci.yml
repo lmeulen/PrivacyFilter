@@ -27,8 +27,13 @@ jobs:
           uv run python -c "from pathlib import Path; assert not Path('datasets').exists();
           assert Path('src/privacyfilter/data/firstnames.csv').is_file();
           assert Path('src/privacyfilter/data/lastnames.csv').is_file()"
-      - name: Lint for syntax and undefined names
-        run: uv run ruff check . --select E9,F63,F7,F82
+      - name: Lint
+        run: uv run ruff check .
+      - name: Check formatting for maintained modules
+        run: >-
+          uv run ruff format --check src/privacyfilter/configuration.py
+          src/privacyfilter/rules.py src/privacyfilter/nlp.py src/privacyfilter/core.py
+          test/test_Components.py
       - name: Run tests
         run: uv run pytest -q
 

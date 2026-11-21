@@ -1,12 +1,22 @@
 import argparse
 import os
+from collections.abc import Sequence
+from os import PathLike
+from typing import Protocol
 
 import pandas as pd
 
 from .core import PrivacyFilter
 
 
-def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';'):
+class TextFilter(Protocol):
+    def filter(self, text: object) -> str: ...
+
+
+def parse_csv_file(
+    inputfile: str | PathLike[str], outputfile: str | PathLike[str], columns: Sequence[int],
+    privacyfilter: TextFilter, separator: str = ";",
+) -> None:
     print("Opening input file:")
     print('  Filename         : ' + inputfile)
     df = pd.read_csv(inputfile, sep=separator, encoding="ISO-8859-1")  # , usecols=[0, 1, 2, 3, 4, 5, 6])
@@ -16,7 +26,9 @@ def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';')
         columnName = df.columns[column]
         print('  Column to filter : ' + columnName)
         print("    Applying filter")
-        df[columnName] = df.apply(lambda row: privacyfilter.filter(str(row[columnName])), axis=1)
+        df[columnName] = df.apply(
+            lambda row, column_name=columnName: privacyfilter.filter(str(row[column_name])), axis=1
+        )
         print()
 
     print("Saving output file")
@@ -24,7 +36,9 @@ def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';')
     df.to_csv(outputfile, sep=separator, encoding="ISO-8859-1", index=False)
 
 
-def main_file(inputfile, outputfile, columns):
+def main_file(
+    inputfile: str | PathLike[str], outputfile: str | PathLike[str], columns: Sequence[int]
+) -> None:
     print("Initializing filter")
     pfilter_nlp = PrivacyFilter()
     pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
@@ -32,7 +46,7 @@ def main_file(inputfile, outputfile, columns):
     parse_csv_file(inputfile, outputfile, columns, pfilter_nlp)
 
 
-def main_directory(directory, columns):
+def main_directory(directory: str | PathLike[str], columns: Sequence[int]) -> None:
     print("Initializing filter")
     pfilter_nlp = PrivacyFilter()
     pfilter_nlp.initialize(clean_accents=True, nlp_filter=True, wordlist_filter=True, regular_expressions=True)
@@ -41,7 +55,7 @@ def main_directory(directory, columns):
         print('Please specify a directory as parameter')
         return
 
-    for root, dirs, files in os.walk(directory):
+    for root, _directories, files in os.walk(directory):
         for file in files:
             name, ext = os.path.splitext(file)
             if ext.lower() != ".csv" or name.endswith("_filtered"):

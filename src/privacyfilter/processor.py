@@ -1,8 +1,5 @@
 import os
 import string
-import io
-import sys
-import trace
 
 
 class KeywordProcessor(object):

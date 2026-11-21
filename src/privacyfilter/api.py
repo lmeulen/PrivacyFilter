@@ -5,7 +5,8 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 
-from .core import PrivacyFilter, __version__
+from ._version import __version__
+from .core import PrivacyFilter
 
 
 @asynccontextmanager
