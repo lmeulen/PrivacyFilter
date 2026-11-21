@@ -1,13 +1,23 @@
 import argparse
 import os
+import warnings
+
 import pandas as pd
+
 from PrivacyFilter import PrivacyFilter
 
 
-def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';'):
+def parse_csv_file(inputfile, outputfile, columns, privacyfilter, separator=';', *, seperator=None):
+    if seperator is not None:
+        warnings.warn(
+            "seperator is deprecated; use separator",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        separator = seperator
     print("Opening input file:")
     print('  Filename         : ' + inputfile)
-    df = pd.read_csv(inputfile, sep=seperator, encoding="ISO-8859-1")  # , usecols=[0, 1, 2, 3, 4, 5, 6])
+    df = pd.read_csv(inputfile, sep=separator, encoding="ISO-8859-1")  # , usecols=[0, 1, 2, 3, 4, 5, 6])
     print('  Rows             : ' + str(len(df)))
 
     for column in columns:
@@ -19,7 +29,7 @@ def parse_csv_file(inputfile, outputfile, columns, privacyfilter, seperator=';')
 
     print("Saving output file")
     print('  Filename         : ' + outputfile)
-    df.to_csv(outputfile, sep=seperator, encoding="ISO-8859-1", index=False)
+    df.to_csv(outputfile, sep=separator, encoding="ISO-8859-1", index=False)
 
 
 def main_file(inputfile, outputfile, columns):
@@ -41,12 +51,14 @@ def main_directory(directory, columns):
 
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(".csv"):
-                inputfile = os.path.join(directory, file)
-                name, ext = os.path.splitext(file)
-                outputfile = os.path.join(directory, name + '_filtered' + ext)
-                parse_csv_file(inputfile, outputfile, columns, pfilter_nlp, seperator=',')
-                print()
+            name, ext = os.path.splitext(file)
+            if ext.lower() != ".csv" or name.endswith("_filtered"):
+                continue
+
+            inputfile = os.path.join(root, file)
+            outputfile = os.path.join(root, name + '_filtered' + ext)
+            parse_csv_file(inputfile, outputfile, columns, pfilter_nlp, separator=',')
+            print()
 
 
 if __name__ == "__main__":
